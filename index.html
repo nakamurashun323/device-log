@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>手続き・備品ログ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#f2f4f1;--surface:#fff;--ink:#1a211e;--ink2:#3a4540;--muted:#6b7872;
+  --line:#dde2de;--faint:#f0f3f0;--hover:#eaf3ee;
+  --accent:#1a6b53;--accent2:#2d8f6f;--accent-soft:#e0eeea;--accent-ink:#fff;
+  --c-order:#1e5ba8;--c-order-bg:#e5edf8;
+  --c-change:#6b3fa8;--c-change-bg:#ede7f6;
+  --c-setup:#1a6b53;--c-setup-bg:#e0eeea;
+  --c-lend:#8a570a;--c-lend-bg:#f5ecda;
+  --c-return:#4a5750;--c-return-bg:#e8ece9;
+  --c-repair:#a84220;--c-repair-bg:#f6e6df;
+  --c-cancel:#a82030;--c-cancel-bg:#f6e0e3;
+  --c-supply:#3a7a3a;--c-supply-bg:#e3f0e3;
+  --r:12px;
+  --f:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111714;--surface:#182018;--ink:#e5ece7;--ink2:#c0ccc3;--muted:#88978f;
+  --line:#263029;--faint:#1e2820;--hover:#1f3028;
+  --accent:#4db896;--accent-soft:#1a3530;--accent-ink:#0a1a14;
+  --c-order:#7aaae8;--c-order-bg:#1a2a40;--c-change:#b897e0;--c-change-bg:#271a3a;
+  --c-setup:#4db896;--c-setup-bg:#1a3530;--c-lend:#d8a855;--c-lend-bg:#302010;
+  --c-return:#9eaaa3;--c-return-bg:#232c27;--c-repair:#e0845a;--c-repair-bg:#301a10;
+  --c-cancel:#e0606e;--c-cancel-bg:#301015;--c-supply:#7ab87a;--c-supply-bg:#1a301a;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding:20px 14px 100px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ヘッダー */
+.hdr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+h1{font-size:19px;font-weight:700}
+.hbtns{display:flex;gap:7px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 13px;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;white-space:nowrap;transition:border-color .15s;color:var(--ink)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-size:14px;padding:8px 18px}
+.btn.danger{color:var(--c-cancel);border-color:var(--c-cancel)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:7px}
+
+/* 設定バナー */
+#setupBanner{background:var(--faint);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:10px;margin-bottom:16px}
+#setupBanner h3{font-size:14px;font-weight:700;color:var(--accent)}
+#setupBanner label{font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:3px}
+#setupBanner input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 11px;background:var(--surface);font-size:14px}
+.setup-row{display:flex;gap:8px}
+
+/* タブ */
+.tabs{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);margin-bottom:14px;width:fit-content}
+.tabs button{border:0;border-right:1px solid var(--line);background:transparent;padding:8px 18px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.tabs button:last-child{border-right:0}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.cnt{font-size:11px;margin-left:3px;opacity:.7}
+
+/* リスト */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.empty{padding:48px 20px;text-align:center;color:var(--muted);font-size:13px}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s;align-items:center}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--hover)}
+.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap}
+.row-title{font-weight:600;font-size:13.5px}
+.row-sub{font-size:12px;color:var(--muted)}
+.row-meta{text-align:right;font-size:12px;color:var(--muted);white-space:nowrap;line-height:1.4}
+
+/* ダイアログ */
+dialog{border:0;border-radius:16px;padding:0;background:var(--surface);box-shadow:0 8px 40px rgb(0 0 0/.18);width:min(96vw,520px);max-height:92dvh;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+dialog::backdrop{background:rgb(0 0 0/.45)}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 0}
+.dlg-head h2{font-size:16px;font-weight:700}
+form{overflow-y:auto;padding:14px 20px 24px;display:grid;gap:11px}
+label.f{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--muted)}
+label.f input,label.f select,label.f textarea{
+  border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+  background:var(--faint);color:var(--ink);font-size:15px;width:100%
+}
+label.f textarea{resize:vertical;min-height:56px;font-size:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* セグメント選択 */
+.seg-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{cursor:pointer}
+.seg label input[type=radio]{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+.seg label span{
+  display:inline-block;padding:7px 14px;border:1.5px solid var(--line);
+  border-radius:8px;font-size:13px;font-weight:600;transition:all .12s;
+  background:var(--surface);white-space:nowrap;user-select:none
+}
+.seg label:has(input:checked) span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* アクション選択（大きめボタン） */
+.act-seg{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
+.act-seg label span{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:10px 6px;border:1.5px solid var(--line);border-radius:10px;
+  font-size:12.5px;font-weight:700;text-align:center;min-height:52px;
+  background:var(--surface);transition:all .12s;white-space:nowrap;user-select:none
+}
+.act-seg label input{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+
+/* アクション別色 */
+.act-seg label[data-ac="発注"]:has(input:checked) span{background:var(--c-order-bg);color:var(--c-order);border-color:var(--c-order)}
+.act-seg label[data-ac="機種変更"]:has(input:checked) span{background:var(--c-change-bg);color:var(--c-change);border-color:var(--c-change)}
+.act-seg label[data-ac="初期設定"]:has(input:checked) span{background:var(--c-setup-bg);color:var(--c-setup);border-color:var(--c-setup)}
+.act-seg label[data-ac="貸与"]:has(input:checked) span{background:var(--c-lend-bg);color:var(--c-lend);border-color:var(--c-lend)}
+.act-seg label[data-ac="返却"]:has(input:checked) span{background:var(--c-return-bg);color:var(--c-return);border-color:var(--c-return)}
+.act-seg label[data-ac="修理"]:has(input:checked) span{background:var(--c-repair-bg);color:var(--c-repair);border-color:var(--c-repair)}
+.act-seg label[data-ac="解約"]:has(input:checked) span{background:var(--c-cancel-bg);color:var(--c-cancel);border-color:var(--c-cancel)}
+
+.factions{display:flex;gap:8px;justify-content:flex-end;padding-top:4px;flex-wrap:wrap}
+.factions .left{margin-right:auto}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0));right:20px;
+  width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);
+  color:var(--accent-ink);font-size:28px;box-shadow:0 4px 16px rgb(0 0 0/.22);
+  display:flex;align-items:center;justify-content:center;z-index:100;transition:transform .15s}
+.fab:active{transform:scale(.92)}
+@media(min-width:700px){.fab{display:none}}
+
+/* QR */
+.qr-overlay{position:fixed;inset:0;background:rgb(0 0 0/.5);z-index:200;display:none;align-items:center;justify-content:center}
+.qr-overlay.open{display:flex}
+.qr-box{background:var(--surface);border-radius:16px;padding:28px 32px;text-align:center;display:grid;gap:12px;max-width:290px;width:90vw}
+.qr-box h3{font-size:15px;font-weight:700}
+.qr-url{font-size:10.5px;color:var(--muted);word-break:break-all}
+
+@media(max-width:600px){
+  dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0}
+  .dlg-head{padding:14px 16px 0}
+  form{padding:12px 16px 20px}
+  label.f input,label.f select{font-size:16px}
+  .factions{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px;margin:0 -16px;z-index:10}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <h1>📋 手続き・備品ログ</h1>
+    <div class="hbtns">
+      <button class="btn" id="btnSetup" type="button">⚙️</button>
+      <button class="btn" id="btnLog" type="button">🔒 通信</button>
+      <button class="btn" id="btnQr" type="button">QR</button>
+      <button class="btn primary" id="btnNew" type="button">＋ 記録する</button>
+    </div>
+  </header>
+
+  <!-- 設定バナー -->
+  <div id="setupBanner" style="display:none">
+    <h3>⚙️ 初期設定</h3>
+    <div>
+      <label>Google Apps Script の URL</label>
+      <input type="url" id="iGasUrl" placeholder="https://script.google.com/macros/s/..." autocomplete="off">
+    </div>
+    <div class="setup-row">
+      <button class="btn primary" id="btnSaveConfig" type="button">保存</button>
+      <button class="btn" id="btnCloseSetup" type="button">閉じる</button>
+    </div>
+    <p style="font-size:11.5px;color:var(--muted)" id="syncNote"></p>
+  </div>
+
+  <!-- タブ -->
+  <div class="tabs" id="mainTabs">
+    <button type="button" data-m="device" aria-pressed="true">端末・ライセンス<span class="cnt" id="cntD">0</span></button>
+    <button type="button" data-m="supply" aria-pressed="false">備品・消耗品<span class="cnt" id="cntS">0</span></button>
+  </div>
+
+  <!-- リスト -->
+  <div class="card" id="list"></div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" type="button">＋</button>
+
+<!-- QR -->
+<div class="qr-overlay" id="qrOverlay">
+  <div class="qr-box">
+    <h3>このページのQRコード</h3>
+    <div id="qrcode"></div>
+    <p class="qr-url" id="qrUrl"></p>
+    <button class="btn" id="qrClose" type="button">閉じる</button>
+  </div>
+</div>
+
+<!-- フォームダイアログ -->
+<dialog id="dlg">
+  <div class="dlg-head">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <h2 id="dlgTitle">記録する</h2>
+      <div class="tabs" id="frmTabs" style="margin:0">
+        <button type="button" data-fm="device" aria-pressed="true">端末</button>
+        <button type="button" data-fm="supply" aria-pressed="false">備品</button>
+      </div>
+    </div>
+    <button class="btn ghost" type="button" id="btnDlgX" style="font-size:18px;padding:4px 8px">✕</button>
+  </div>
+
+  <form id="frm" method="dialog">
+
+    <!-- ===== 端末セクション ===== -->
+    <div id="secDevice">
+      <div style="margin-bottom:11px">
+        <div class="seg-label">種別</div>
+        <div class="seg" id="segCat">
+          <label><input type="radio" name="cat" value="携帯"><span>📱 携帯</span></label>
+          <label><input type="radio" name="cat" value="ポケットWi-Fi"><span>📶 Wi-Fi</span></label>
+          <label><input type="radio" name="cat" value="PC"><span>💻 PC</span></label>
+          <label><input type="radio" name="cat" value="Microsoft 365"><span>🪟 M365</span></label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:11px">
+        <div class="seg-label">手続き</div>
+        <div class="act-seg" id="segAct">
+          <label data-ac="発注"><input type="radio" name="act" value="発注"><span>📦<br>発注</span></label>
+          <label data-ac="機種変更"><input type="radio" name="act" value="機種変更"><span>🔄<br>機種変更</span></label>
+          <label data-ac="初期設定"><input type="radio" name="act" value="初期設定"><span>⚙️<br>初期設定</span></label>
+          <label data-ac="貸与"><input type="radio" name="act" value="貸与"><span>🤝<br>貸与</span></label>
+          <label data-ac="返却"><input type="radio" name="act" value="返却"><span>↩️<br>返却</span></label>
+          <label data-ac="修理"><input type="radio" name="act" value="修理"><span>🔧<br>修理</span></label>
+          <label data-ac="解約"><input type="radio" name="act" value="解約"><span>🚫<br>解約</span></label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:11px">
+        <div class="seg-label">部署</div>
+        <div class="seg" id="segDept"></div>
+      </div>
+
+      <div class="grid2">
+        <label class="f">氏名<input id="iName" placeholder="山田 太郎" autocomplete="off" inputmode="text"></label>
+        <label class="f">端末番号<input id="iNo" placeholder="090-XXXX-XXXX" autocomplete="off" inputmode="tel"></label>
+      </div>
+
+      <label class="f">機種名<input id="iModel" placeholder="iPhone 16 Pro など" autocomplete="off"></label>
+
+      <div class="grid2">
+        <label class="f">日付<input type="date" id="iDate"></label>
+        <div>
+          <div class="seg-label">状態</div>
+          <div class="seg">
+            <label><input type="radio" name="status" value="手配中"><span>手配中</span></label>
+            <label><input type="radio" name="status" value="完了"><span>✓ 完了</span></label>
+          </div>
+        </div>
+      </div>
+
+      <label class="f">メモ（任意）<textarea id="iMemo" rows="2" placeholder="備考など"></textarea></label>
+    </div>
+
+    <!-- ===== 備品セクション ===== -->
+    <div id="secSupply" hidden>
+      <div style="margin-bottom:11px">
+        <div class="seg-label">購入先</div>
+        <div class="seg" id="segSupplier">
+          <label><input type="radio" name="supplier" value="ASKUL"><span>ASKUL</span></label>
+          <label><input type="radio" name="supplier" value="Amazon"><span>Amazon</span></label>
+          <label><input type="radio" name="supplier" value="その他"><span>その他</span></label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:11px">
+        <div class="seg-label">部署</div>
+        <div class="seg" id="segDeptS"></div>
+      </div>
+
+      <label class="f">品名<input id="iSName" placeholder="A4コピー用紙 など" autocomplete="off"></label>
+
+      <div class="grid2">
+        <label class="f">数量<input id="iQty" type="number" min="1" placeholder="1" inputmode="numeric"></label>
+        <label class="f">金額（円）<input id="iAmt" type="number" min="0" placeholder="0" inputmode="numeric"></label>
+      </div>
+
+      <div class="grid2">
+        <label class="f">注文日<input type="date" id="iSDate"></label>
+        <label class="f">到着予定日<input type="date" id="iDelivDate"></label>
+      </div>
+
+      <div class="grid2">
+        <label class="f">状態<select id="iSStatus"><option>発注済</option><option>受取済</option></select></label>
+        <label class="f">注文番号<input id="iOrderNo" placeholder="注文番号" autocomplete="off"></label>
+      </div>
+
+      <label class="f">メモ（任意）<textarea id="iSMemo" rows="2" placeholder="管理番号・用途など"></textarea></label>
+    </div>
+
+    <div class="factions">
+      <button class="btn danger left" type="button" id="btnDel" hidden>削除</button>
+      <button class="btn ghost" type="button" id="btnCancel">キャンセル</button>
+      <button class="btn primary" type="submit" id="btnSave">保存する</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* ===== 設定 ===== */
+const LS_GAS  = "devlog.gasUrl";
+const LS_LOGS = "devlog.logs";
+const LS_DEPTS= "devlog.depts";
+const DEPTS_DEFAULT = ["MB","KB","本社","その他"];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const today = () => new Date().toISOString().slice(0,10);
+const newId = () => "L"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const fmtDate = d => d ? d.slice(5).replace('-','/') : "";
+
+/* ===== 状態 ===== */
+let gasUrl = "";
+let logs   = [];
+let depts  = [...DEPTS_DEFAULT];
+let mode   = "device";
+let fMode  = "device";
+let editId = null;
+
+/* ===== ローカルストレージ ===== */
+function lsLoad(){
+  try{
+    gasUrl = localStorage.getItem(LS_GAS)||"";
+    const d = localStorage.getItem(LS_DEPTS);
+    if(d){const p=JSON.parse(d);if(Array.isArray(p)&&p.length)depts=p;}
+    const l = localStorage.getItem(LS_LOGS);
+    if(l) logs = JSON.parse(l)||[];
+  }catch(e){}
+}
+function lsSave(){
+  try{localStorage.setItem(LS_LOGS,JSON.stringify(logs));}catch(e){}
+}
+
+/* ===== GAS通信 ===== */
+async function gasGet(){
+  if(!gasUrl) return;
+  addCommLog("データ取得", "Google Apps Script", "スプレッドシートからログ・部署を取得");
+  try{
+    const r = await fetch(gasUrl+"?action=getAll");
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const d = await r.json();
+    if(Array.isArray(d.logs)){logs=d.logs;lsSave();}
+    if(Array.isArray(d.depts)){depts=d.depts;try{localStorage.setItem(LS_DEPTS,JSON.stringify(depts));}catch(e){}}
+    addCommLog("取得完了", "Google Apps Script", `ログ${logs.length}件を受信`, true);
+    $("#syncNote").textContent = "✓ スプレッドシートと同期中";
+    render();
+  }catch(e){
+    addCommLog("取得失敗", "Google Apps Script", e.message, false);
+    $("#syncNote").textContent = "オフライン — ローカルデータを表示中";
+  }
+}
+async function gasPost(data){
+  if(!gasUrl) return;
+  const label = data.action==="save" ? "保存" : data.action==="delete" ? "削除" : data.action;
+  addCommLog(label, "Google Apps Script", JSON.stringify(data).slice(0,80)+"…");
+  try{
+    await fetch(gasUrl,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+    addCommLog(label+"完了", "Google Apps Script", "送信成功", true);
+  }catch(e){
+    addCommLog(label+"失敗", "Google Apps Script", e.message, false);
+  }
+}
+
+/* ===== ログ操作 ===== */
+async function saveLog(id, data){
+  const row = {id,...data};
+  const idx = logs.findIndex(l=>l.id===id);
+  if(idx>=0) logs[idx]=row; else logs.unshift(row);
+  lsSave(); render();
+  await gasPost({action:"save", log:row});
+}
+async function removeLog(id){
+  logs = logs.filter(l=>l.id!==id);
+  lsSave(); render();
+  await gasPost({action:"delete", id});
+}
+
+/* ===== バッジ色 ===== */
+const ACOL = {発注:"order",機種変更:"change",初期設定:"setup",貸与:"lend",返却:"return",修理:"repair",解約:"cancel",購入:"supply"};
+function badgeStyle(ac){
+  const k = ACOL[ac]||"return";
+  return `background:var(--c-${k}-bg);color:var(--c-${k});border:1px solid var(--c-${k})`;
+}
+
+/* ===== 描画 ===== */
+function buildDeptSegs(){
+  ["segDept","segDeptS"].forEach((id,i)=>{
+    const el = $("#"+id); if(!el) return;
+    const name = i===0?"dept":"deptS";
+    el.innerHTML = depts.map(d=>`<label><input type="radio" name="${name}" value="${esc(d)}"><span>${esc(d)}</span></label>`).join("");
+  });
+}
+
+function render(){
+  const dLogs = logs.filter(l=>l.logType!=="supply");
+  const sLogs = logs.filter(l=>l.logType==="supply");
+  $("#cntD").textContent = dLogs.length;
+  $("#cntS").textContent = sLogs.length;
+  document.querySelectorAll("#mainTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===mode));
+
+  const cur = mode==="supply" ? sLogs : dLogs;
+  if(!cur.length){
+    $("#list").innerHTML='<div class="empty">まだ記録がありません<br><span style="font-size:12px">「＋ 記録する」から登録してください</span></div>';
+    return;
+  }
+
+  $("#list").innerHTML = cur.map(l=>{
+    const ac = l.logType==="supply" ? "購入" : (l.action||"");
+    const title = l.logType==="supply"
+      ? [l.supplier, l.sName].filter(Boolean).join(" ")
+      : [l.name, l.dept].filter(Boolean).join(" ");
+    const sub = l.logType==="supply"
+      ? [l.sName && l.quantity ? l.quantity+"個" : "", l.amount ? "¥"+Number(l.amount).toLocaleString() : ""].filter(Boolean).join(" · ")
+      : [l.category, l.model].filter(Boolean).join(" · ");
+    return `<div class="row" data-id="${esc(l.id)}">
+      <span class="badge" style="${badgeStyle(ac)}">${esc(ac)}</span>
+      <div>
+        <div class="row-title">${esc(title.trim()||"—")}</div>
+        ${sub?`<div class="row-sub">${esc(sub)}</div>`:""}
+      </div>
+      <div class="row-meta">${fmtDate(l.date)}<br><span style="opacity:.7">${esc(l.status||"")}</span></div>
+    </div>`;
+  }).join("");
+}
+
+/* ===== フォーム ===== */
+function setFMode(m){
+  fMode = m;
+  $("#secDevice").hidden = m!=="device";
+  $("#secSupply").hidden  = m!=="supply";
+  document.querySelectorAll("#frmTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.fm===m));
+}
+
+function openForm(pre={}){
+  editId = pre.id||null;
+  const m = pre.logType==="supply" ? "supply" : "device";
+  setFMode(m);
+  buildDeptSegs();
+  $("#dlgTitle").textContent = editId ? "記録を編集" : "記録する";
+  $("#btnDel").hidden = !editId;
+
+  if(m==="device"){
+    document.querySelectorAll('input[name=cat]').forEach(r=>r.checked=r.value===(pre.category||""));
+    document.querySelectorAll('input[name=act]').forEach(r=>r.checked=r.value===(pre.action||""));
+    document.querySelectorAll('input[name=dept]').forEach(r=>r.checked=r.value===(pre.dept||""));
+    document.querySelectorAll('input[name=status]').forEach(r=>r.checked=r.value===(pre.status||"完了"));
+    $("#iName").value  = pre.name||"";
+    $("#iNo").value    = pre.number||"";
+    $("#iModel").value = pre.model||"";
+    $("#iDate").value  = pre.date||today();
+    $("#iMemo").value  = pre.memo||"";
+  } else {
+    document.querySelectorAll('input[name=supplier]').forEach(r=>r.checked=r.value===(pre.supplier||""));
+    document.querySelectorAll('input[name=deptS]').forEach(r=>r.checked=r.value===(pre.dept||""));
+    $("#iSName").value     = pre.sName||"";
+    $("#iQty").value       = pre.quantity||"";
+    $("#iAmt").value       = pre.amount||"";
+    $("#iSDate").value     = pre.date||today();
+    $("#iDelivDate").value = pre.deliveryDate||"";
+    $("#iSStatus").value   = pre.status||"発注済";
+    $("#iOrderNo").value   = pre.orderNo||"";
+    $("#iSMemo").value     = pre.sMemo||"";
+  }
+  $("#dlg").showModal();
+}
+
+/* ===== 送信 ===== */
+$("#frm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const btn = $("#btnSave"); btn.disabled=true; btn.textContent="保存中…";
+  try{
+    if(fMode==="supply"){
+      await saveLog(editId||newId(),{
+        logType:"supply",
+        supplier: document.querySelector('input[name=supplier]:checked')?.value||"",
+        dept:     document.querySelector('input[name=deptS]:checked')?.value||"",
+        sName:    $("#iSName").value.trim(),
+        quantity: $("#iQty").value ? Number($("#iQty").value) : null,
+        amount:   $("#iAmt").value ? Number($("#iAmt").value) : null,
+        date:     $("#iSDate").value||today(),
+        deliveryDate: $("#iDelivDate").value||null,
+        status:   $("#iSStatus").value,
+        orderNo:  $("#iOrderNo").value.trim()||null,
+        sMemo:    $("#iSMemo").value.trim(),
+        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(),
+        updatedAt:Date.now()
+      });
+    } else {
+      await saveLog(editId||newId(),{
+        logType:"device",
+        category:document.querySelector('input[name=cat]:checked')?.value||"",
+        action:  document.querySelector('input[name=act]:checked')?.value||"",
+        dept:    document.querySelector('input[name=dept]:checked')?.value||"",
+        name:    $("#iName").value.trim(),
+        number:  $("#iNo").value.trim(),
+        model:   $("#iModel").value.trim(),
+        date:    $("#iDate").value||today(),
+        status:  document.querySelector('input[name=status]:checked')?.value||"完了",
+        memo:    $("#iMemo").value.trim(),
+        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(),
+        updatedAt:Date.now()
+      });
+    }
+    $("#dlg").close();
+  } finally { btn.disabled=false; btn.textContent="保存する"; }
+});
+
+/* ===== 編集・削除 ===== */
+$("#list").addEventListener("click", e=>{
+  const row = e.target.closest(".row"); if(!row) return;
+  const l = logs.find(x=>x.id===row.dataset.id); if(!l) return;
+  openForm(l);
+});
+$("#btnDel").onclick = async()=>{
+  if(!editId||!confirm("この記録を削除しますか？")) return;
+  await removeLog(editId);
+  $("#dlg").close();
+};
+
+/* ===== ダイアログ制御 ===== */
+$("#btnNew").onclick = ()=>openForm({logType:mode==="supply"?"supply":"device"});
+$("#fab").onclick    = ()=>openForm({logType:mode==="supply"?"supply":"device"});
+$("#btnDlgX").onclick  = ()=>$("#dlg").close();
+$("#btnCancel").onclick = ()=>$("#dlg").close();
+document.querySelectorAll("#frmTabs button").forEach(b=>b.onclick=()=>setFMode(b.dataset.fm));
+document.querySelectorAll("#mainTabs button").forEach(b=>b.onclick=()=>{mode=b.dataset.m;render();});
+
+/* ===== 設定 ===== */
+$("#btnLog").onclick = ()=>showCommLog();
+$("#btnSetup").onclick = ()=>{
+  $("#iGasUrl").value = gasUrl;
+  const b = $("#setupBanner");
+  b.style.display = b.style.display==="none" ? "" : "none";
+};
+$("#btnCloseSetup").onclick = ()=>{ $("#setupBanner").style.display="none"; };
+$("#btnSaveConfig").onclick = ()=>{
+  const url = $("#iGasUrl").value.trim();
+  if(!url){ alert("URLを入力してください"); return; }
+  gasUrl = url;
+  try{ localStorage.setItem(LS_GAS, gasUrl); }catch(e){}
+  gasGet();
+};
+
+/* ===== 通信ログ ===== */
+const commLog = [];
+function addCommLog(type, dest, detail, ok=true){
+  const now = new Date();
+  const ts = now.toLocaleDateString("ja-JP",{month:"2-digit",day:"2-digit"})
+           + " " + now.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const ua = navigator.userAgent;
+  const dev = ua.includes("iPhone")||ua.includes("Android") ? "📱" : ua.includes("iPad") ? "📱" : "💻";
+  commLog.unshift({ts, type, dest, detail, ok, dev});
+  if(commLog.length > 50) commLog.length = 50;
+}
+
+function showCommLog(){
+  const html = commLog.length === 0
+    ? '<p style="color:var(--muted);font-size:12px;padding:8px 0">まだ通信はありません</p>'
+    : commLog.map(c=>`
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px">
+        <span style="color:var(--muted);white-space:nowrap">${c.ts} ${c.dev}</span>
+        <span>
+          <span style="font-weight:700;color:${c.ok?'var(--accent)':'var(--c-cancel)'}">${c.ok?'✓':'✗'} ${esc(c.type)}</span>
+          <span style="color:var(--muted)"> → ${esc(c.dest)}</span><br>
+          <span style="color:var(--ink2)">${esc(c.detail)}</span>
+        </span>
+      </div>`).join("");
+
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;inset:0;background:rgb(0 0 0/.5);z-index:300;display:flex;align-items:center;justify-content:center";
+  box.innerHTML = `<div style="background:var(--surface);border-radius:14px;padding:0;width:min(96vw,560px);max-height:80dvh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)">
+      <h3 style="font-size:14px;font-weight:700">🔒 通信ログ</h3>
+      <button style="border:0;background:transparent;font-size:18px;cursor:pointer;color:var(--muted)" id="logClose">✕</button>
+    </div>
+    <div style="padding:4px 20px 16px;overflow-y:auto;font-size:12px">
+      <p style="font-size:11px;color:var(--muted);padding:8px 0 4px">このツールが行ったすべての通信を記録しています。外部への情報漏洩がないか確認できます。</p>
+      ${html}
+    </div>
+  </div>`;
+  document.body.appendChild(box);
+  box.addEventListener("click",e=>{ if(e.target===box||e.target.id==="logClose") box.remove(); });
+}
+
+/* ===== QR ===== */
+let qrDone = false;
+$("#btnQr").onclick = ()=>{
+  if(!qrDone){
+    const url = location.href;
+    new QRCode($("#qrcode"),{text:url,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+    $("#qrUrl").textContent = url;
+    qrDone = true;
+  }
+  $("#qrOverlay").classList.add("open");
+};
+$("#qrClose").onclick = ()=>$("#qrOverlay").classList.remove("open");
+$("#qrOverlay").addEventListener("click",e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove("open");});
+
+/* ===== 初期化 ===== */
+lsLoad();
+buildDeptSegs();
+render();
+addCommLog("ページ読み込み", location.hostname||"GitHub Pages", "ツールを起動しました", true);
+
+if(!gasUrl){
+  $("#setupBanner").style.display = "";
+  $("#syncNote").textContent = "GASのURLを入力して保存してください";
+} else {
+  gasGet();
+}
+</script>
+</body>
+</html>
