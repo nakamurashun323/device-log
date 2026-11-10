@@ -264,8 +264,9 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
       <div class="cam-msg" id="camMsg">カメラを起動しています…</div>
     </div>
     <button class="scan-shoot" id="camShoot" type="button" disabled>撮影する</button>
-    <label class="scan-alt">標準カメラで撮影<input type="file" id="scanCamera" accept="image/*" capture="environment" hidden></label>
-    <label class="scan-alt">PDF・画像を選択<input type="file" id="scanFile" accept="image/*,application/pdf" hidden></label>
+    <label class="scan-alt" id="pickPhoto">撮った写真を選ぶ<input type="file" id="scanFile" accept="image/*,application/pdf" hidden></label>
+    <p class="note" id="camFallbackNote" hidden>このiPhoneではブラウザからカメラが使えないため、カメラアプリで撮った写真を選んでください。選ぶと自動で読み取ります。</p>
+    <label class="scan-alt" id="pickCamera">標準カメラで撮影<input type="file" id="scanCamera" accept="image/*" capture="environment" hidden></label>
     <button class="scan-cancel" id="scanCancel" type="button">一覧へ戻る</button>
   </div>
 </div>
@@ -1017,12 +1018,29 @@ function closeScan(){
 /* ページ内カメラ（標準カメラアプリを呼ばずに映像を直接表示） */
 let camStream=null;
 function camMessage(text){ const m=$("#camMsg"); m.textContent=text; m.hidden=!text; }
+function camFallback(on){
+  $("#camBox").hidden=on; $("#camShoot").hidden=on; $("#pickCamera").hidden=on; $("#camFallbackNote").hidden=!on;
+  $("#pickPhoto").className = on ? "scan-shoot" : "scan-alt";
+  if(on) stopCam();
+}
+/* 映像が届いても真っ黒のまま（端末側でカメラが止められている）かを確かめる */
+async function isBlackFeed(v){
+  const c=document.createElement("canvas"); c.width=32; c.height=24; const g=c.getContext("2d",{willReadFrequently:true});
+  for(let i=0;i<6;i++){
+    await new Promise(r=>setTimeout(r,400));
+    if(!camStream) return false;
+    g.drawImage(v,0,0,32,24);
+    const d=g.getImageData(0,0,32,24).data; let s=0; for(let k=0;k<d.length;k+=4) s+=d[k]+d[k+1]+d[k+2];
+    if(s/(d.length/4)/3 > 6) return false;   // 少しでも明るさがあれば映っている
+  }
+  return true;
+}
 async function startCam(){
   const shoot=$("#camShoot"); shoot.disabled=true;
+  camFallback(false);
   camMessage("カメラを起動しています…");
   if(!navigator.mediaDevices?.getUserMedia){
-    camMessage("このブラウザではページ内カメラが使えません。下の「標準カメラで撮影」を使ってください。");
-    addLog("カメラ","この端末","getUserMedia非対応",false); return;
+    addLog("カメラ","この端末","getUserMedia非対応",false); camFallback(true); return;
   }
   try{
     camStream = await navigator.mediaDevices.getUserMedia({ audio:false,
@@ -1031,7 +1049,10 @@ async function startCam(){
     const v=$("#camVideo"); v.srcObject=camStream;
     await v.play().catch(()=>{});
     await new Promise(r=>{ if(v.videoWidth) r(); else v.onloadedmetadata=()=>r(); setTimeout(r,3000); });
-    if(!v.videoWidth){ camMessage("カメラの映像が届きません。他のアプリでカメラを使っていないか確認するか、「標準カメラで撮影」を使ってください。"); return; }
+    camMessage("カメラを確認しています…");
+    if(!v.videoWidth || await isBlackFeed(v)){
+      addLog("カメラ","この端末","映像が真っ暗のため写真選択に切り替え",false); camFallback(true); return;
+    }
     camMessage(""); shoot.disabled=false;
     addLog("カメラ","この端末",`起動 ${v.videoWidth}×${v.videoHeight}・映像は外部送信なし`);
   }catch(err){
@@ -1040,8 +1061,8 @@ async function startCam(){
       : err.name==="NotFoundError" ? "カメラが見つかりませんでした。"
       : err.name==="NotReadableError" ? "カメラを他のアプリが使っています。他のアプリを閉じてから開き直してください。"
       : `カメラを起動できませんでした（${err.name}）。`;
-    camMessage(why + "\n下の「標準カメラで撮影」でも撮れます。");
     addLog("カメラ","この端末",`${err.name}: ${err.message}`,false);
+    camFallback(true);
   }
 }
 function stopCam(){
