@@ -140,6 +140,15 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
 .ocr-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ocr-pick { display: flex; align-items: center; justify-content: center; padding: 9px; border: 1px solid var(--accent); border-radius: var(--r); cursor: pointer; font-size: 12.5px; color: var(--accent); background: var(--surface); }
 .ocr-pick:hover { background: var(--accent-light); }
+.ocr-paste { grid-column: 1 / -1; }
+.scan-paste { color: var(--accent); border-color: var(--accent); }
+#pasteDlg { width: min(96vw, 480px); }
+#pasteDlg[open] { grid-template-rows: auto 1fr; }
+.paste-body { overflow-y: auto; padding: 14px 20px 20px; display: grid; gap: 12px; }
+.paste-steps { font-size: 12.5px; color: var(--text-muted); line-height: 1.8; padding-left: 1.3em; }
+.paste-steps b { color: var(--text); font-weight: 500; }
+#pasteText { width: 100%; min-height: 160px; padding: 10px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); font-size: 14px; resize: vertical; }
+#pasteText:focus { border-color: var(--accent); outline: none; }
 .ocr-preview { position: relative; }
 .ocr-preview img { width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); }
 .ocr-clear { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgb(0 0 0 / .5); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
@@ -265,6 +274,7 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
       <div class="cam-msg" id="camMsg">カメラを起動しています…</div>
     </div>
     <button class="scan-shoot" id="camShoot" type="button" disabled>撮影する</button>
+    <button class="scan-alt scan-paste" type="button" data-paste="scan">写真の文字を貼り付け（高精度）</button>
     <label class="scan-alt">標準カメラで撮影<input type="file" id="scanCamera" accept="image/*" capture="environment" hidden></label>
     <label class="scan-alt">PDF・画像を選択<input type="file" id="scanFile" accept="image/*,application/pdf" hidden></label>
     <button class="scan-cancel" id="scanCancel" type="button">一覧へ戻る</button>
@@ -322,6 +332,28 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
     </div>
   </div>
 </div>
+
+<!-- 写真の文字を貼り付け（iPhone／Androidの文字認識を使う。端末内で処理） -->
+<dialog id="pasteDlg">
+  <div class="dlg-head">
+    <h2>写真の文字を貼り付け</h2>
+    <button class="icon-btn" id="pasteX" type="button" aria-label="閉じる">✕</button>
+  </div>
+  <div class="paste-body">
+    <ol class="paste-steps">
+      <li>カメラアプリで書類を撮影</li>
+      <li>写真アプリでその写真を開き、右下の<b>文字認識ボタン</b>（四角の中に線のマーク）をタップ</li>
+      <li>文字を長押し →<b>「すべてを選択」</b>→<b>「コピー」</b></li>
+      <li>下の欄に貼り付けて「読み取る」</li>
+    </ol>
+    <textarea id="pasteText" placeholder="ここを長押しして貼り付け"></textarea>
+    <p class="note">文字認識はiPhone（Androidは Googleレンズ）の中で行われ、外部には送信されません。</p>
+    <div class="form-actions">
+      <button class="btn btn-ghost" type="button" id="pasteCancel">キャンセル</button>
+      <button class="btn btn-primary" type="button" id="pasteGo">読み取る</button>
+    </div>
+  </div>
+</dialog>
 
 <!-- フォーム -->
 <dialog id="dlg">
@@ -381,6 +413,7 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
         <div class="ocr-btns">
           <label class="ocr-pick">カメラで撮影<input type="file" id="ocrOrderCamera" accept="image/*" capture="environment" hidden></label>
           <label class="ocr-pick">PDF・画像を選択<input type="file" id="ocrOrderFile" accept="image/*,application/pdf" hidden></label>
+          <button type="button" class="ocr-pick ocr-paste" data-paste="order">写真の文字を貼り付け（高精度）</button>
         </div>
         <div class="bar" id="ocrOrderBarWrap" hidden><div class="bar-fill" id="ocrOrderBar"></div></div>
         <div class="ocr-preview" id="ocrOrderPreview" hidden>
@@ -419,6 +452,7 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
         <div class="ocr-btns">
           <label class="ocr-pick">納品書を撮影<input type="file" id="ocrDelivCamera" accept="image/*" capture="environment" hidden></label>
           <label class="ocr-pick">PDF・画像を選択<input type="file" id="ocrDelivFile" accept="image/*,application/pdf" hidden></label>
+          <button type="button" class="ocr-pick ocr-paste" data-paste="deliv">写真の文字を貼り付け（高精度）</button>
         </div>
         <div class="bar" id="ocrDelivBarWrap" hidden><div class="bar-fill" id="ocrDelivBar"></div></div>
         <div class="ocr-preview" id="ocrDelivPreview" hidden>
@@ -678,24 +712,93 @@ async function fileToCanvas(file){
   });
 }
 
+function normalizeText(raw){
+  // OCRが日本語1文字ごとに空白を入れているときだけ詰める（iPhoneの文字認識の正しい空白は残す）
+  const jp=(raw.match(/[^\x00-\x7F]/g)||[]).length, gaps=(raw.match(/[^\x00-\x7F] (?=[^\x00-\x7F])/g)||[]).length;
+  if(jp && gaps/jp>0.2) raw=raw.replace(/(?<=[^\x00-\x7F]) (?=[^\x00-\x7F])/g,"");
+  return raw
+    .replace(/[０-９Ａ-Ｚａ-ｚ]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/[，、](?=\d{3})/g,",").replace(/[．]/g,".").replace(/[：]/g,":").replace(/[／]/g,"/").replace(/[－ー−‐](?=\d)/g,"-")
+    .replace(/[¥￥]/g,"¥")
+    .replace(/\r/g,"");
+}
+const toInt = s => parseInt(String(s).replace(/,/g,""),10);
+function readDate(s){
+  const m=s.match(/(\d{2,4})\s*[\/\-年.]\s*(\d{1,2})\s*[\/\-月.]\s*(\d{1,2})/);
+  if(!m) return null;
+  let y=+m[1]; if(y<100) y+=2000;
+  const mo=+m[2], d=+m[3];
+  if(y<2015||y>2099||mo<1||mo>12||d<1||d>31) return null;
+  return `${y}-${String(mo).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+}
+function dateAfter(text, labelRe){
+  const m=text.match(new RegExp(`(?:${labelRe})[^\\d\\n]{0,8}([\\d]{2,4}\\s*[/\\-年.]\\s*\\d{1,2}\\s*[/\\-月.]\\s*\\d{1,2})`));
+  return m ? readDate(m[1]) : null;
+}
 function parseText(raw){
-  const text = raw.replace(/[，]/g,",").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
-  const r={};
-  const sv=supplierFromText(text); if(sv) r.supplier=sv;
-  const tot = text.match(/(?:合計|総額|ご請求|請求金額|お支払|税込)[^\d\n]{0,12}([\d,]{3,})/);
-  if(tot) r.amount = parseInt(tot[1].replace(/,/g,""),10);
-  if(!r.amount){
-    const ns=[...text.matchAll(/[¥￥]\s?([\d,]{3,})|([\d,]{3,})\s?円/g)].map(m=>parseInt((m[1]||m[2]).replace(/,/g,""),10)).filter(n=>n>=100&&n<10000000);
+  const text=normalizeText(raw);
+  const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);
+  const r={ items:[] };
+  r.supplier = supplierFromText(text);
+  r.docType = /納品書/.test(text) ? "納品書" : /請求書/.test(text) ? "請求書" : /注文書|注文確認|ご注文内容/.test(text) ? "注文書" : /領収書/.test(text) ? "領収書" : null;
+
+  // 日付（ラベル付きを優先）
+  r.orderDate = dateAfter(text,"ご発注日|発注日|ご注文日|注文日|注文確定日");
+  r.deliveryDate = dateAfter(text,"納品日|お届け日|到着日|配達日");
+  if(!r.orderDate && !r.deliveryDate){
+    for(const l of lines){ const d=readDate(l); if(d){ r.orderDate=d; break; } }
+  }
+  r.date = r.orderDate || r.deliveryDate;
+
+  // 注文・伝票番号
+  const om=text.match(/(?:伝票番号|ご注文番号|注文番号|注文No\.?|オーダー番号|Order\s*(?:No\.?|#|ID)|発注番号|お問い合わせ番号)[\s:：#.]*([A-Z0-9][A-Z0-9\-]{4,24})/i);
+  if(om) r.orderNo=om[1];
+
+  // 明細：数量×単価＝金額 になっている数字の並びを拾う（OCRの崩れに強い）
+  const codeRe=/^([A-Z0-9]{2,4}-\d{3,5})\s*(.+)$/;
+  const codeNames=[]; const byLine=[]; let lastName=null;
+  for(const l of lines){
+    const cm=l.match(codeRe);
+    if(cm && /[ぁ-んァ-ヶ一-龠A-Za-z]{2}/.test(cm[2])){ lastName=cm[2].replace(/\s{2,}/g," ").trim(); codeNames.push(lastName); }
+    const nums=(l.match(/\d[\d,]*(?:\.\d+)?/g)||[]).filter(x=>!/\./.test(x)).map(toInt);
+    for(let i=0;i+2<nums.length;i++){
+      const [q,p,a]=[nums[i],nums[i+1],nums[i+2]];
+      if(q>0&&q<10000&&p>0&&a>0&&q*p===a){ byLine.push({name:lastName,qty:q,price:p,amount:a}); lastName=null; break; }
+    }
+  }
+  // 数字が1つずつ改行されて出た場合に備え、全体の並びでも探す
+  const bySeq=[]; const toks=(text.match(/\d[\d,]*(?:\.\d+)?/g)||[]).filter(x=>!/\./.test(x)).map(toInt);
+  for(let i=0;i+2<toks.length;i++){
+    const [q,p,a]=[toks[i],toks[i+1],toks[i+2]];
+    if(q>0&&q<10000&&p>=10&&a>=10&&q*p===a){ bySeq.push({name:null,qty:q,price:p,amount:a}); i+=2; }
+  }
+  r.items = bySeq.length>byLine.length ? bySeq : byLine;
+  if(codeNames.length===r.items.length) r.items.forEach((x,i)=>{ x.name=codeNames[i]; });
+
+  // 合計金額（ラベルの後ろ、数行先まで探す）
+  const tm=text.match(/(?:合計金額|総合計|ご請求金額|請求金額|お支払(?:い)?金額|税込合計|合計)(?:\(税込\))?[\s\S]{0,40}?(\d{1,3}(?:,\d{3})+|\d{3,})/);
+  if(tm) r.amount=toInt(tm[1]);
+  const sumItems=r.items.reduce((s,x)=>s+x.amount,0);
+  if(r.items.length && (!r.amount || r.amount<sumItems)) r.amount = sumItems;   // ラベルが読めない・明らかに小さいときは明細合計
+  if(r.amount==null){
+    const ns=[...text.matchAll(/¥\s?([\d,]{3,})|([\d,]{3,})\s?円|(\d{1,3}(?:,\d{3})+)/g)].map(m=>toInt(m[1]||m[2]||m[3])).filter(n=>n>=100&&n<10000000);
     if(ns.length) r.amount=Math.max(...ns);
   }
-  const qm=text.match(/(?:数量|個数)[^\d\n]{0,6}(\d{1,4})/) || text.match(/(\d{1,4})\s*(?:個|枚|本|冊|箱|セット|パック|袋)/);
-  if(qm) r.quantity=parseInt(qm[1],10);
-  const dm=text.match(/(20\d{2})\s*[\/\-年.]\s*(\d{1,2})\s*[\/\-月.]\s*(\d{1,2})/);
-  if(dm) r.date=`${dm[1]}-${dm[2].padStart(2,"0")}-${dm[3].padStart(2,"0")}`;
-  const om=text.match(/(?:注文番号|ご注文番号|注文No\.?|Order\s*No\.?|Order#|発注番号|伝票番号)[\s:：#]*([A-Z0-9][A-Z0-9\-]{4,24})/i);
-  if(om) r.orderNo=om[1];
-  const lines=text.split(/\n/).map(l=>l.trim()).filter(l=>l.length>4&&l.length<60&&/[ぁ-んァ-ヶ一-龠A-Za-z]/.test(l)&&!/合計|小計|送料|税|注文|領収|請求|納品|株式会社|住所|電話|TEL|〒|TOTAL|様/i.test(l));
-  if(lines.length) r.sName=lines.sort((a,b)=>b.length-a.length)[0];
+  r.amountChecked = r.items.length>0 && sumItems===r.amount;
+
+  // 数量
+  if(r.items.length) r.quantity=r.items.reduce((s,x)=>s+x.qty,0);
+  else { const qm=text.match(/(?:数量|個数)[^\d\n]{0,6}(\d{1,4})/); if(qm) r.quantity=+qm[1]; }
+
+  // 品名
+  const named=r.items.filter(x=>x.name);
+  if(named.length) r.sName = named[0].name + (r.items.length>1 ? ` 他${r.items.length-1}点` : "");
+  else if(codeNames.length) r.sName = codeNames[0] + (codeNames.length>1 ? ` 他${codeNames.length-1}点` : "");
+  else {
+    const cand=lines.filter(l=>l.length>4&&l.length<60&&/[ぁ-んァ-ヶ一-龠]{2}/.test(l)&&!/合計|小計|送料|税|注文|領収|請求|納品|株式会社|住所|電話|TEL|〒|様|上段|下段|番号|担当|お問い合わせ|ありがとう|サービス|都|区/i.test(l));
+    const clean=cand.filter(l=>(l.match(/[ぁ-んァ-ヶ一-龠]/g)||[]).length/l.replace(/\s/g,"").length>0.5);   // 記号だらけの誤認識は使わない
+    if(clean.length) r.sName=clean.sort((a,b)=>b.length-a.length)[0];
+  }
   return r;
 }
 
@@ -721,15 +824,23 @@ async function ocrFile(file, cb){
 }
 
 function setDl(sel, fname, zone){
-  const b=$(sel);
-  b.textContent = `${fname} として保存`;
-  b.onclick = ()=>{
-    const f=ocrFiles[zone]; if(!f) return;
-    const url=URL.createObjectURL(f), a=document.createElement("a");
-    a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-    addLog("電帳法ファイル保存","端末のダウンロード",fname);
-  };
+  const b=$(sel), f=ocrFiles[zone];
+  if(f){
+    b.textContent = `${fname} として保存`;
+    b.onclick = ()=>{
+      const url=URL.createObjectURL(f), a=document.createElement("a");
+      a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      addLog("電帳法ファイル保存","端末のダウンロード",fname);
+    };
+  } else {
+    const base=fname.replace(/\.[a-z]+$/i,"");
+    b.textContent = `ファイル名をコピー：${base}`;
+    b.onclick = async ()=>{
+      try{ await navigator.clipboard.writeText(base); toast("ファイル名をコピーしました"); }
+      catch(e){ prompt("このファイル名で写真をBOXに保存してください", base); }
+    };
+  }
 }
 
 function resetOcr(zone){
@@ -743,33 +854,54 @@ function fillOrderFields(p){
   if(p.supplier) setRadio("supplier",p.supplier);
   if(p.amount!=null) $("#iAmt").value=p.amount;
   if(p.quantity!=null) $("#iQty").value=p.quantity;
-  if(p.date) $("#iSDate").value=p.date;
+  if(p.orderDate||p.date) $("#iSDate").value=p.orderDate||p.date;
   if(p.orderNo) $("#iOrderNo").value=p.orderNo;
   if(p.sName && !$("#iSName").value) $("#iSName").value=p.sName;
+  if(p.items?.length>1 && !$("#iSMemo").value)
+    $("#iSMemo").value = p.items.map(x=>`・${x.name||"（品名不明）"} ×${x.qty} ${yen(x.amount)}`).join("\n");
+}
+function summary(p){
+  return [p.docType, p.supplier, p.orderNo&&`番号 ${p.orderNo}`, p.orderDate&&`発注日 ${p.orderDate}`, p.deliveryDate&&`納品日 ${p.deliveryDate}`,
+    p.items?.length&&`明細${p.items.length}点`, p.quantity!=null&&`数量 ${p.quantity}`, p.amount!=null&&`合計 ${yen(p.amount)}${p.amountChecked?"（明細の合計と一致）":""}`].filter(Boolean).join("、");
+}
+const weak = p => p.amount==null && !p.items?.length;
+const WEAK_MSG = "うまく読み取れませんでした。「iPhoneの文字認識を貼り付け」を使うと正確に読めます。";
+function showPreview(zone, res){
+  const z = zone==="order" ? "Order" : "Deliv";
+  if(res.preview){ $(`#ocr${z}Img`).src=res.preview; $(`#ocr${z}Preview`).hidden=false; }
+  else $(`#ocr${z}Preview`).hidden=true;
 }
 
 function applyOrder(res){
   const p=res.parsed;
   fillOrderFields(p);
-  $("#ocrOrderImg").src=res.preview; $("#ocrOrderPreview").hidden=false;
-  const items=[p.supplier&&`購入先 ${p.supplier}`, p.date&&`日付 ${p.date}`, p.amount!=null&&`金額 ${yen(p.amount)}`, p.quantity!=null&&`数量 ${p.quantity}`, p.orderNo&&`注文番号 ${p.orderNo}`].filter(Boolean);
-  $("#ocrOrderResultText").textContent = items.length ? `自動入力しました：${items.join("、")}。内容を確認して保存してください。` : "読み取れた項目がありませんでした。手入力してください。";
-  ocrFiles.order=res.file;
-  setDl("#btnDlOrder", makeFileName({supplier:radioVal("supplier")||p.supplier, date:$("#iSDate").value, amount:num($("#iAmt").value)}, res.file.name), "order");
+  showPreview("order", res);
+  $("#ocrOrderResultText").textContent = weak(p) ? WEAK_MSG : `自動入力しました：${summary(p)}。内容を確認して保存してください。`;
+  ocrFiles.order=res.file||null;
+  const suffix = p.docType ? `-${p.docType}` : "";
+  setDl("#btnDlOrder", makeFileName({supplier:radioVal("supplier")||p.supplier, date:(p.docType==="納品書"&&p.deliveryDate)||$("#iSDate").value, amount:num($("#iAmt").value)}, res.file?.name, suffix), "order");
   $("#ocrOrderResult").hidden=false; $("#ocrOrderStatus").textContent="読み取り完了";
+  // 発注を記録していなかった納品書は、そのまま「受取済」として記録できるようにする
+  if(p.docType==="納品書"){
+    $("#verifySection").hidden=false;
+    if(p.quantity!=null) $("#iDelivQty").value=p.quantity;
+    if(p.amount!=null) $("#iDelivAmt").value=p.amount;
+    $("#iDelivDate").value=p.deliveryDate||today();
+    renderVerify(true);
+  }
 }
 
 function applyDeliv(res){
   const p=res.parsed;
   if(p.quantity!=null) $("#iDelivQty").value=p.quantity;
   if(p.amount!=null) $("#iDelivAmt").value=p.amount;
-  $("#iDelivDate").value = p.date || today();
+  $("#iDelivDate").value = p.deliveryDate || p.date || today();
+  if(p.orderNo && !$("#iOrderNo").value) $("#iOrderNo").value=p.orderNo;
   renderVerify(true);
-  $("#ocrDelivImg").src=res.preview; $("#ocrDelivPreview").hidden=false;
-  const items=[p.amount!=null&&`金額 ${yen(p.amount)}`, p.quantity!=null&&`数量 ${p.quantity}`, p.date&&`日付 ${p.date}`].filter(Boolean);
-  $("#ocrDelivResultText").textContent = items.length ? `納品書から読み取り：${items.join("、")}` : "数量・金額を読み取れませんでした。手入力してください。";
-  ocrFiles.deliv=res.file;
-  setDl("#btnDlDeliv", makeFileName({supplier:radioVal("supplier")||p.supplier, date:p.date||today(), amount:num($("#iDelivAmt").value)}, res.file.name, "-納品書"), "deliv");
+  showPreview("deliv", res);
+  $("#ocrDelivResultText").textContent = weak(p) ? WEAK_MSG : `納品書から読み取り：${summary(p)}`;
+  ocrFiles.deliv=res.file||null;
+  setDl("#btnDlDeliv", makeFileName({supplier:radioVal("supplier")||p.supplier, date:p.deliveryDate||p.date||today(), amount:num($("#iDelivAmt").value)}, res.file?.name, "-納品書"), "deliv");
   $("#ocrDelivResult").hidden=false; $("#ocrDelivStatus").textContent="読み取り完了";
 }
 
@@ -934,6 +1066,33 @@ $("#pickNew").onclick=()=>{
   applyDeliv(res);
 };
 $("#pickClose").onclick=()=>{ pendingDeliv=null; $("#pickOverlay").classList.remove("open"); };
+
+/* ===== 写真の文字を貼り付け ===== */
+let pasteTarget=null;
+document.addEventListener("click", e=>{
+  const b=e.target.closest("[data-paste]"); if(!b) return;
+  pasteTarget = b.dataset.paste==="scan" ? "scan-"+scanKind : b.dataset.paste;
+  $("#pasteText").value="";
+  $("#pasteDlg").showModal();
+});
+$("#pasteX").onclick=()=>$("#pasteDlg").close();
+$("#pasteCancel").onclick=()=>$("#pasteDlg").close();
+$("#pasteGo").onclick=()=>{
+  const text=$("#pasteText").value.trim();
+  if(!text){ alert("文字が貼り付けられていません"); return; }
+  const res={ file:null, preview:null, parsed:parseText(text) };
+  addLog("文字の貼り付け","この端末",`${text.length}文字を解析・外部送信なし`);
+  $("#pasteDlg").close();
+  const t=pasteTarget; pasteTarget=null;
+  if(t==="order") applyOrder(res);
+  else if(t==="deliv") applyDeliv(res);
+  else {
+    const kind=t==="scan-deliv"?"deliv":"order";
+    closeScan(); mode="supply"; render();
+    if(kind==="order"){ openForm({logType:"supply"},{title:"発注を記録"}); applyOrder(res); }
+    else routeDeliv(res);
+  }
+};
 
 /* ===== Excel ===== */
 $("#btnExcel").onclick=()=>{
