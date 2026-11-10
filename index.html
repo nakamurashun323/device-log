@@ -12,194 +12,208 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <style>
 :root {
-  --blue-900: #0f2744;
-  --blue-800: #1a3a5c;
-  --blue-700: #1e4976;
-  --blue-600: #2563a8;
-  --blue-500: #3b82f6;
-  --blue-400: #60a5fa;
-  --blue-100: #dbeafe;
-  --blue-50:  #eff6ff;
-  --gray-900: #111827;
-  --gray-700: #374151;
-  --gray-500: #6b7280;
-  --gray-300: #d1d5db;
-  --gray-200: #e5e7eb;
-  --gray-100: #f3f4f6;
-  --gray-50:  #f9fafb;
-  --white:    #ffffff;
-  --red-600:  #dc2626;
-  --red-50:   #fef2f2;
-  --green-600:#16a34a;
-  --green-50: #f0fdf4;
-  --amber-600:#d97706;
-  --amber-50: #fffbeb;
-
-  --surface: var(--white);
-  --bg: var(--gray-50);
-  --border: var(--gray-200);
-  --text: var(--gray-900);
-  --text-muted: var(--gray-500);
-  --accent: var(--blue-600);
-  --accent-hover: var(--blue-700);
-  --accent-light: var(--blue-50);
+  --surface: #ffffff;
+  --bg: #f7f9fc;
+  --border: #e3e8f0;
+  --border-strong: #c9d3e1;
+  --text: #142033;
+  --text-muted: #66758c;
+  --accent: #2563a8;
+  --accent-hover: #1e4f88;
+  --accent-light: #eaf2fc;
+  --accent-mid: #cfe0f5;
+  --danger: #c4323a;
+  --danger-light: #fdf0f1;
+  --hover: #f2f6fb;
   --r: 8px;
   --f: "Inter","Noto Sans JP",system-ui,sans-serif;
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --surface: #1c2333;
-  --bg: #131929;
-  --border: #2d3a52;
-  --text: #e2e8f0;
-  --text-muted: #8899b4;
-  --accent: var(--blue-400);
-  --accent-hover: var(--blue-500);
-  --accent-light: #1e2d4a;
-  --gray-100: #232f45;
-  --gray-50: #1c2642;
-  --gray-200: #2a3a52;
-  --gray-300: #3a4d6a;
+  --surface: #1a2232; --bg: #121926; --border: #2a3549; --border-strong: #3a4862;
+  --text: #e3e9f2; --text-muted: #8c9ab0;
+  --accent: #6aa5ea; --accent-hover: #8bbaf0; --accent-light: #1d2c44; --accent-mid: #27406a;
+  --danger: #f07178; --danger-light: #3a1d22; --hover: #1f2939;
   color-scheme: dark;
 }}
+:root[data-theme="dark"]{
+  --surface: #1a2232; --bg: #121926; --border: #2a3549; --border-strong: #3a4862;
+  --text: #e3e9f2; --text-muted: #8c9ab0;
+  --accent: #6aa5ea; --accent-hover: #8bbaf0; --accent-light: #1d2c44; --accent-mid: #27406a;
+  --danger: #f07178; --danger-light: #3a1d22; --hover: #1f2939;
+  color-scheme: dark;
+}
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: var(--bg); color: var(--text); font-family: var(--f); font-size: 14px; line-height: 1.6; min-height: 100dvh; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; border: none; background: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-/* レイアウト */
-.wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 96px; }
 
-/* ヘッダー */
-.hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.hdr-title { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
-.hdr-actions { display: flex; gap: 8px; align-items: center; }
+.hdr { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.hdr-title { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+.hdr-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
-/* ボタン */
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--r); font-size: 13px; font-weight: 500; transition: background .12s, color .12s, border-color .12s; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 13px; border-radius: var(--r); font-size: 13px; font-weight: 500; transition: background .12s, color .12s, border-color .12s; white-space: nowrap; }
 .btn-ghost { border: 1px solid var(--border); color: var(--text-muted); background: var(--surface); }
-.btn-ghost:hover { border-color: var(--gray-300); color: var(--text); background: var(--gray-100); }
-.btn-primary { background: var(--accent); color: var(--white); border: 1px solid transparent; }
+.btn-ghost:hover { border-color: var(--border-strong); color: var(--text); }
+.btn-primary { background: var(--accent); color: #fff; border: 1px solid transparent; }
 .btn-primary:hover { background: var(--accent-hover); }
-.btn-danger { color: var(--red-600); border: 1px solid var(--border); background: var(--surface); }
-.btn-danger:hover { background: var(--red-50); border-color: var(--red-600); }
+.btn-outline { border: 1px solid var(--accent); color: var(--accent); background: var(--surface); }
+.btn-outline:hover { background: var(--accent-light); }
+.btn-danger { color: var(--danger); border: 1px solid var(--border); background: var(--surface); }
+.btn-danger:hover { border-color: var(--danger); background: var(--danger-light); }
 
-/* タブ */
-.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; gap: 0; }
-.tab-btn { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .12s, border-color .12s; }
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+.tab-btn { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .tab-btn[aria-pressed="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 .tab-btn:hover:not([aria-pressed="true"]) { color: var(--text); }
-.tab-count { font-size: 11px; margin-left: 4px; padding: 1px 6px; border-radius: 10px; background: var(--gray-100); color: var(--text-muted); }
-.tab-btn[aria-pressed="true"] .tab-count { background: var(--accent-light); color: var(--accent); }
+.tab-count { font-size: 11px; margin-left: 6px; color: var(--text-muted); }
+.tab-btn[aria-pressed="true"] .tab-count { color: var(--accent); }
 
-/* リスト */
+.quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.quick[hidden] { display: none; }
+.quick .btn { padding: 10px; }
+
 .list-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
 .empty-state { padding: 56px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
-.list-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+.list-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
 .list-row:last-child { border-bottom: none; }
-.list-row:hover { background: var(--gray-50); }
-.row-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.row-label { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
-.row-title { font-size: 13px; font-weight: 500; }
+.list-row:hover { background: var(--hover); }
+.row-top { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.row-label { font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 4px; background: var(--accent-light); color: var(--accent); white-space: nowrap; }
+.row-label.is-cancel { background: var(--danger-light); color: var(--danger); }
+.row-title { font-size: 13.5px; font-weight: 500; }
+.row-dept { font-size: 12px; color: var(--text-muted); }
 .row-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .row-right { text-align: right; }
 .row-date { font-size: 12px; color: var(--text-muted); }
-.row-status { font-size: 11px; font-weight: 500; margin-top: 2px; }
+.row-status { font-size: 11px; margin-top: 2px; color: var(--text-muted); }
+.row-status.done { color: var(--accent); }
+.row-status.diff, .diff-mark { color: var(--danger); }
+.diff-mark { font-size: 11px; }
 
-/* ラベル色 */
-.lbl-order  { background: var(--blue-50);  color: var(--blue-700); }
-.lbl-change { background: #f3f0ff; color: #5b21b6; }
-.lbl-setup  { background: var(--green-50); color: var(--green-600); }
-.lbl-lend   { background: var(--amber-50); color: var(--amber-600); }
-.lbl-return { background: var(--gray-100); color: var(--gray-700); }
-.lbl-repair { background: #fff7ed; color: #c2410c; }
-.lbl-cancel { background: var(--red-50);   color: var(--red-600); }
-.lbl-supply { background: var(--blue-50);  color: var(--blue-700); }
-.status-done   { color: var(--green-600); }
-.status-pend   { color: var(--text-muted); }
-.status-diff   { color: var(--red-600); }
-
-/* ダイアログ */
-dialog { border: none; border-radius: 12px; padding: 0; background: var(--surface); box-shadow: 0 4px 32px rgb(0 0 0 / .16); width: min(96vw, 520px); max-height: 92dvh; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+dialog { border: none; border-radius: 12px; padding: 0; background: var(--surface); color: var(--text); box-shadow: 0 4px 32px rgb(0 0 0 / .16); width: min(96vw, 520px); max-height: 92dvh; overflow: hidden; }
+dialog[open] { display: grid; grid-template-rows: auto auto 1fr; }
 dialog::backdrop { background: rgb(0 0 0 / .4); }
-.dlg-head { padding: 20px 20px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dlg-head { padding: 18px 20px 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dlg-head h2 { font-size: 15px; font-weight: 600; }
-.dlg-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--text-muted); font-size: 16px; }
-.dlg-close:hover { background: var(--gray-100); color: var(--text); }
-.dlg-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin: 16px 20px 0; }
+.icon-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--text-muted); font-size: 15px; }
+.icon-btn:hover { background: var(--hover); color: var(--text); }
+.dlg-tabs { display: flex; border-bottom: 1px solid var(--border); margin: 12px 20px 0; }
 .dlg-tab { padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .dlg-tab[aria-pressed="true"] { color: var(--accent); border-bottom-color: var(--accent); }
-form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
-.field { display: grid; gap: 4px; }
-.field label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
-.field input, .field select, .field textarea {
+form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
+#secDevice, #secSupply { display: grid; gap: 14px; }
+#secDevice[hidden], #secSupply[hidden] { display: none; }
+.field { display: grid; gap: 5px; }
+.field > label, .field-label { font-size: 12px; color: var(--text-muted); }
+.field input, .field textarea {
   width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r);
-  background: var(--bg); color: var(--text); font-size: 14px; transition: border-color .12s;
+  background: var(--bg); font-size: 14px; transition: border-color .12s;
 }
-.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
+.field input:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
 .field textarea { resize: vertical; min-height: 54px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* チップ選択 */
 .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { position: relative; }
 .chip input { position: absolute; opacity: 0; width: 0; height: 0; }
 .chip span {
-  display: inline-block; padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px;
-  font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-muted);
-  background: var(--surface); transition: all .1s; white-space: nowrap; user-select: none;
+  display: inline-block; padding: 5px 11px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 12.5px; cursor: pointer; color: var(--text-muted); background: var(--surface);
+  transition: all .1s; white-space: nowrap; user-select: none;
 }
+.chip span:hover { border-color: var(--border-strong); color: var(--text); }
 .chip:has(input:checked) span { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-.chip span:hover { border-color: var(--gray-300); color: var(--text); }
+.chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-/* フォームアクション */
-.form-actions { display: flex; gap: 8px; justify-content: flex-end; padding-top: 4px; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; padding-top: 2px; }
 .form-actions .left { margin-right: auto; }
 
-/* OCRゾーン */
-.ocr-zone { border: 1px solid var(--border); border-radius: var(--r); padding: 12px; background: var(--bg); display: grid; gap: 8px; }
-.ocr-zone-label { font-size: 12px; font-weight: 500; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+/* OCR */
+.ocr-zone { border: 1px solid var(--border); border-radius: var(--r); padding: 12px; background: var(--bg); display: grid; gap: 10px; }
+.ocr-zone.is-verify { border-color: var(--accent-mid); background: var(--accent-light); }
+.ocr-zone-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; }
+.ocr-zone-head .t { color: var(--text); font-weight: 500; }
+.ocr-zone-head .s { color: var(--accent); font-size: 11px; }
 .ocr-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.ocr-pick-label { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border: 1px solid var(--accent); border-radius: var(--r); cursor: pointer; font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-light); transition: background .1s; }
-.ocr-pick-label:hover { background: var(--blue-100); }
-.ocr-preview { display: none; position: relative; }
-.ocr-preview img { width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); }
-.ocr-clear-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgb(0 0 0 / .5); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
-.ocr-result { display: none; padding: 8px 10px; border: 1px solid var(--blue-100); border-radius: var(--r); background: var(--accent-light); font-size: 12px; }
-.ocr-result-title { font-weight: 600; color: var(--accent); margin-bottom: 2px; }
-.ocr-result-text { color: var(--text-muted); line-height: 1.8; }
-.ocr-dl-btn { display: none; width: 100%; margin-top: 8px; padding: 9px; border-radius: var(--r); background: var(--accent); color: var(--white); font-size: 12px; font-weight: 500; cursor: pointer; border: none; }
+.ocr-pick { display: flex; align-items: center; justify-content: center; padding: 9px; border: 1px solid var(--accent); border-radius: var(--r); cursor: pointer; font-size: 12.5px; color: var(--accent); background: var(--surface); }
+.ocr-pick:hover { background: var(--accent-light); }
+.ocr-preview { position: relative; }
+.ocr-preview img { width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); }
+.ocr-clear { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgb(0 0 0 / .5); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.ocr-result { padding: 9px 10px; border: 1px solid var(--accent-mid); border-radius: var(--r); background: var(--surface); font-size: 12px; display: grid; gap: 6px; }
+.ocr-result-text { color: var(--text-muted); line-height: 1.7; }
+.ocr-dl { width: 100%; padding: 9px; border-radius: var(--r); background: var(--accent); color: #fff; font-size: 12.5px; }
+.ocr-dl:hover { background: var(--accent-hover); }
+.bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+[hidden] { display: none !important; }
 
-/* 納品照合 */
-.verify-zone { border: 1px solid var(--amber-600); border-radius: var(--r); padding: 12px; background: var(--amber-50); display: grid; gap: 10px; }
-.verify-zone-title { font-size: 12px; font-weight: 600; color: var(--amber-600); }
-.verify-banner { padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-.verify-ok  { background: var(--green-50);  color: var(--green-600); }
-.verify-ng  { background: var(--red-50);    color: var(--red-600); }
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .verify-zone { background: #2a1f00; border-color: #d97706; } :root:not([data-theme="light"]) .verify-ok { background: #052e16; } :root:not([data-theme="light"]) .verify-ng { background: #450a0a; } :root:not([data-theme="light"]) .ocr-result { background: var(--accent-light); border-color: var(--blue-700); }}
+.verify-banner { padding: 8px 10px; border-radius: 6px; font-size: 12.5px; }
+.verify-ok { background: var(--surface); color: var(--accent); border: 1px solid var(--accent-mid); }
+.verify-ng { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger); }
 
-/* 通信ログモーダル */
-.modal-overlay { position: fixed; inset: 0; background: rgb(0 0 0 / .4); z-index: 300; display: none; align-items: center; justify-content: center; }
+/* オーバーレイ共通 */
+.modal-overlay { position: fixed; inset: 0; background: rgb(0 0 0 / .4); z-index: 300; display: none; align-items: center; justify-content: center; padding: 16px; }
 .modal-overlay.open { display: flex; }
-.modal-box { background: var(--surface); border-radius: 12px; width: min(96vw, 540px); max-height: 80dvh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border); }
-.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.modal-box { background: var(--surface); border-radius: 12px; width: min(100%, 520px); max-height: 82dvh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
 .modal-head h3 { font-size: 14px; font-weight: 600; }
-.modal-body { overflow-y: auto; padding: 12px 20px 20px; }
+.modal-body { overflow-y: auto; padding: 14px 18px 18px; }
+.note { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
 
 /* QR */
-.qr-box { background: var(--surface); border-radius: 12px; padding: 28px 32px; text-align: center; display: grid; gap: 12px; max-width: 280px; width: 90vw; border: 1px solid var(--border); }
-.qr-url { font-size: 10px; color: var(--text-muted); word-break: break-all; }
+.seg { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { flex: 1; padding: 7px 8px; font-size: 12px; color: var(--text-muted); border-right: 1px solid var(--border); }
+.seg button:last-child { border-right: none; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.qr-wrap { display: grid; justify-items: center; gap: 10px; padding-top: 16px; text-align: center; }
+#qrcode { padding: 12px; background: #fff; border-radius: 8px; border: 1px solid var(--border); }
+.qr-url { font-size: 10.5px; color: var(--text-muted); word-break: break-all; }
 
-/* 新規ボタン（固定） */
-.new-btn-wrap { position: fixed; bottom: 24px; right: 20px; z-index: 100; }
+/* 撮影画面 */
+.scan-screen { position: fixed; inset: 0; z-index: 400; background: var(--bg); display: none; align-items: center; justify-content: center; padding: 24px 20px; }
+.scan-screen.open { display: flex; }
+.scan-inner { width: 100%; max-width: 360px; display: grid; gap: 12px; text-align: center; }
+.scan-kicker { font-size: 12px; color: var(--accent); letter-spacing: .04em; }
+.scan-inner h2 { font-size: 20px; font-weight: 600; }
+.scan-inner p { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+.scan-shoot { display: block; padding: 16px; border-radius: 10px; background: var(--accent); color: #fff; font-size: 15px; font-weight: 500; cursor: pointer; }
+.scan-shoot:active { background: var(--accent-hover); }
+.scan-alt { display: block; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); font-size: 13px; cursor: pointer; }
+.scan-cancel { font-size: 13px; color: var(--text-muted); padding: 8px; }
+
+/* 認識中 */
+.busy { position: fixed; inset: 0; z-index: 500; background: rgb(0 0 0 / .45); display: none; align-items: center; justify-content: center; }
+.busy.open { display: flex; }
+.busy-box { background: var(--surface); border-radius: 12px; padding: 24px 22px; width: min(86vw, 320px); display: grid; gap: 12px; text-align: center; }
+.busy-title { font-size: 15px; font-weight: 500; }
+.busy-sub { font-size: 11px; color: var(--text-muted); }
+
+/* 候補選択 */
+.pick-row { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; width: 100%; text-align: left; padding: 11px 12px; border: 1px solid var(--border); border-radius: var(--r); margin-bottom: 8px; background: var(--surface); }
+.pick-row:hover { border-color: var(--accent); background: var(--accent-light); }
+.pick-row .t { font-size: 13px; font-weight: 500; }
+.pick-row .s { font-size: 12px; color: var(--text-muted); }
+.pick-new { width: 100%; padding: 10px; font-size: 12.5px; color: var(--text-muted); border: 1px dashed var(--border-strong); border-radius: var(--r); }
+
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #142033; color: #fff; padding: 9px 18px; border-radius: 8px; font-size: 13px; z-index: 600; opacity: 0; transition: opacity .2s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+.new-btn-wrap { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); right: 16px; z-index: 100; }
+.new-btn-wrap .btn { padding: 10px 18px; border-radius: 22px; box-shadow: 0 2px 10px rgb(0 0 0 / .16); }
 @media(min-width:600px) { .new-btn-wrap { display: none; } }
 
 @media(max-width:600px){
+  .hdr-actions #btnNew { display: none; }
   dialog { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; margin: 0; }
-  .dlg-head { padding: 16px 16px 0; }
-  form { padding: 12px 16px 16px; }
-  .field input, .field select { font-size: 16px; }
-  .form-actions { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px; margin: 0 -16px; }
+  .dlg-head { padding: 14px 16px 0; }
+  .dlg-tabs { margin: 10px 16px 0; }
+  form { padding: 14px 16px 0; }
+  .field input { font-size: 16px; }
+  .form-actions { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); margin: 0 -16px; }
 }
 </style>
 </head>
@@ -212,36 +226,65 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
       <button class="btn btn-ghost" id="btnLog" type="button">通信ログ</button>
       <button class="btn btn-ghost" id="btnQr" type="button">QR</button>
       <button class="btn btn-ghost" id="btnExcel" type="button">Excel</button>
-      <button class="btn btn-primary" id="btnNew" type="button">+ 新規</button>
+      <button class="btn btn-primary" id="btnNew" type="button">新規</button>
     </div>
   </header>
 
   <div class="tabs">
-    <button class="tab-btn" data-m="device" aria-pressed="true" type="button">
-      端末・ライセンス<span class="tab-count" id="cntD">0</span>
-    </button>
-    <button class="tab-btn" data-m="supply" aria-pressed="false" type="button">
-      備品・消耗品<span class="tab-count" id="cntS">0</span>
-    </button>
+    <button class="tab-btn" data-m="device" aria-pressed="true" type="button">端末・ライセンス<span class="tab-count" id="cntD">0</span></button>
+    <button class="tab-btn" data-m="supply" aria-pressed="false" type="button">備品・消耗品<span class="tab-count" id="cntS">0</span></button>
+  </div>
+
+  <div class="quick" id="quickBar" hidden>
+    <button class="btn btn-outline" type="button" data-scan="order">注文書を撮影</button>
+    <button class="btn btn-outline" type="button" data-scan="deliv">納品書を照合</button>
   </div>
 
   <div class="list-card" id="list"></div>
 </div>
 
-<!-- 固定新規ボタン（SP） -->
-<div class="new-btn-wrap">
-  <button class="btn btn-primary" id="fabNew" type="button" style="padding:12px 20px;border-radius:24px;box-shadow:0 2px 12px rgb(0 0 0/.18)">+ 新規</button>
+<div class="new-btn-wrap"><button class="btn btn-primary" id="fabNew" type="button">新規</button></div>
+<div class="toast" id="toast" role="status"></div>
+
+<!-- 撮影画面（QRから直接開く） -->
+<div class="scan-screen" id="scanScreen" role="dialog" aria-modal="true" aria-labelledby="scanTitle">
+  <div class="scan-inner">
+    <div class="scan-kicker" id="scanKicker">発注</div>
+    <h2 id="scanTitle">注文書を撮影</h2>
+    <p id="scanDesc">書類全体が入るように撮影してください。読み取った内容が自動で入力されます。</p>
+    <label class="scan-shoot">撮影する<input type="file" id="scanCamera" accept="image/*" capture="environment" hidden></label>
+    <label class="scan-alt">PDF・画像を選択<input type="file" id="scanFile" accept="image/*,application/pdf" hidden></label>
+    <button class="scan-cancel" id="scanCancel" type="button">一覧へ戻る</button>
+  </div>
+</div>
+
+<!-- 認識中 -->
+<div class="busy" id="busy" role="status" aria-live="polite">
+  <div class="busy-box">
+    <div class="busy-title" id="busyTitle">認識しています…</div>
+    <div class="bar"><div class="bar-fill" id="busyBar"></div></div>
+    <div class="busy-sub" id="busySub">端末内で処理しています（外部送信なし）</div>
+  </div>
+</div>
+
+<!-- 発注の候補選択 -->
+<div class="modal-overlay" id="pickOverlay">
+  <div class="modal-box">
+    <div class="modal-head"><h3>どの発注の納品ですか</h3><button class="icon-btn" id="pickClose" type="button" aria-label="閉じる">✕</button></div>
+    <div class="modal-body">
+      <p class="note" id="pickInfo" style="margin-bottom:12px"></p>
+      <div id="pickList"></div>
+      <button class="pick-new" id="pickNew" type="button">該当なし（新しい記録として登録）</button>
+    </div>
+  </div>
 </div>
 
 <!-- 通信ログ -->
 <div class="modal-overlay" id="logOverlay">
   <div class="modal-box">
-    <div class="modal-head">
-      <h3>通信ログ</h3>
-      <button class="dlg-close" id="logClose" type="button">✕</button>
-    </div>
+    <div class="modal-head"><h3>通信ログ</h3><button class="icon-btn" id="logClose" type="button" aria-label="閉じる">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.7">OCR処理はすべてブラウザ内で完結します。画像データは外部に送信されません。</p>
+      <p class="note" style="margin-bottom:10px">記録はこの端末のブラウザ内にのみ保存されます。OCRは端末内で処理し、画像は外部に送信も保存もしません。</p>
       <div id="logList"></div>
     </div>
   </div>
@@ -249,19 +292,29 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
 
 <!-- QR -->
 <div class="modal-overlay" id="qrOverlay">
-  <div class="qr-box">
-    <div style="font-size:14px;font-weight:600">このページのQR</div>
-    <div id="qrcode"></div>
-    <div class="qr-url" id="qrUrl"></div>
-    <button class="btn btn-ghost" id="qrClose" type="button">閉じる</button>
+  <div class="modal-box" style="max-width:360px">
+    <div class="modal-head"><h3>QRコード</h3><button class="icon-btn" id="qrClose" type="button" aria-label="閉じる">✕</button></div>
+    <div class="modal-body">
+      <div class="seg" id="qrSeg">
+        <button type="button" data-q="order">発注用</button>
+        <button type="button" data-q="deliv">納品用</button>
+        <button type="button" data-q="top">一覧</button>
+      </div>
+      <div class="qr-wrap">
+        <div id="qrcode"></div>
+        <p class="note" id="qrDesc"></p>
+        <p class="qr-url" id="qrUrl"></p>
+        <button class="btn btn-ghost" id="qrSave" type="button">画像を保存</button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- フォームダイアログ -->
+<!-- フォーム -->
 <dialog id="dlg">
   <div class="dlg-head">
     <h2 id="dlgTitle">新規記録</h2>
-    <button class="dlg-close" id="btnDlgX" type="button">✕</button>
+    <button class="icon-btn" id="btnDlgX" type="button" aria-label="閉じる">✕</button>
   </div>
   <div class="dlg-tabs">
     <button class="dlg-tab" data-fm="device" aria-pressed="true" type="button">端末</button>
@@ -270,10 +323,8 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
 
   <form id="frm" method="dialog">
 
-    <!-- 端末 -->
     <div id="secDevice">
-      <div class="field" style="margin-bottom:4px">
-        <label>種別</label>
+      <div class="field"><span class="field-label">種別</span>
         <div class="chip-group">
           <label class="chip"><input type="radio" name="cat" value="携帯"><span>携帯</span></label>
           <label class="chip"><input type="radio" name="cat" value="ポケットWi-Fi"><span>Wi-Fi</span></label>
@@ -281,8 +332,7 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
           <label class="chip"><input type="radio" name="cat" value="Microsoft 365"><span>M365</span></label>
         </div>
       </div>
-      <div class="field" style="margin-bottom:4px">
-        <label>手続き</label>
+      <div class="field"><span class="field-label">手続き</span>
         <div class="chip-group">
           <label class="chip"><input type="radio" name="act" value="発注"><span>発注</span></label>
           <label class="chip"><input type="radio" name="act" value="機種変更"><span>機種変更</span></label>
@@ -293,114 +343,85 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
           <label class="chip"><input type="radio" name="act" value="解約"><span>解約</span></label>
         </div>
       </div>
-      <div class="field" style="margin-bottom:4px">
-        <label>部署</label>
-        <div class="chip-group" id="segDept"></div>
-      </div>
+      <div class="field"><span class="field-label">部署</span><div class="chip-group" id="segDept"></div></div>
       <div class="grid2">
-        <div class="field"><label>氏名</label><input id="iName" placeholder="山田 太郎" autocomplete="off"></div>
-        <div class="field"><label>端末番号</label><input id="iNo" placeholder="090-XXXX-XXXX" inputmode="tel" autocomplete="off"></div>
+        <div class="field"><label for="iName">氏名</label><input id="iName" placeholder="山田 太郎" autocomplete="off"></div>
+        <div class="field"><label for="iNo">端末番号</label><input id="iNo" placeholder="090-XXXX-XXXX" inputmode="tel" autocomplete="off"></div>
       </div>
-      <div class="field"><label>機種名</label><input id="iModel" placeholder="iPhone 16 Pro など" autocomplete="off"></div>
+      <div class="field"><label for="iModel">機種名</label><input id="iModel" placeholder="iPhone 16 Pro など" autocomplete="off"></div>
       <div class="grid2">
-        <div class="field"><label>日付</label><input type="date" id="iDate"></div>
-        <div class="field">
-          <label>状態</label>
+        <div class="field"><label for="iDate">日付</label><input type="date" id="iDate"></div>
+        <div class="field"><span class="field-label">状態</span>
           <div class="chip-group">
             <label class="chip"><input type="radio" name="status" value="手配中"><span>手配中</span></label>
             <label class="chip"><input type="radio" name="status" value="完了"><span>完了</span></label>
           </div>
         </div>
       </div>
-      <div class="field"><label>メモ</label><textarea id="iMemo" rows="2" placeholder="備考など"></textarea></div>
+      <div class="field"><label for="iMemo">メモ</label><textarea id="iMemo" rows="2" placeholder="備考など"></textarea></div>
     </div>
 
-    <!-- 備品 -->
     <div id="secSupply" hidden>
 
-      <!-- 注文書OCR -->
       <div class="ocr-zone">
-        <div class="ocr-zone-label">
-          <span>注文書・請求書を読み取る</span>
-          <span id="ocrOrderStatus" style="color:var(--accent);font-size:11px"></span>
-        </div>
+        <div class="ocr-zone-head"><span class="t">注文書・請求書を読み取る</span><span class="s" id="ocrOrderStatus"></span></div>
         <div class="ocr-btns">
-          <label class="ocr-pick-label">
-            カメラ撮影
-            <input type="file" id="ocrOrderCamera" accept="image/*" capture="environment" style="display:none">
-          </label>
-          <label class="ocr-pick-label">
-            PDF / 画像
-            <input type="file" id="ocrOrderFile" accept="image/*,application/pdf" style="display:none">
-          </label>
+          <label class="ocr-pick">カメラで撮影<input type="file" id="ocrOrderCamera" accept="image/*" capture="environment" hidden></label>
+          <label class="ocr-pick">PDF・画像を選択<input type="file" id="ocrOrderFile" accept="image/*,application/pdf" hidden></label>
         </div>
-        <div class="ocr-preview" id="ocrOrderPreview">
-          <img id="ocrOrderImg" alt="">
-          <button type="button" class="ocr-clear-btn" data-zone="order">✕</button>
+        <div class="bar" id="ocrOrderBarWrap" hidden><div class="bar-fill" id="ocrOrderBar"></div></div>
+        <div class="ocr-preview" id="ocrOrderPreview" hidden>
+          <img id="ocrOrderImg" alt="注文書のプレビュー">
+          <button type="button" class="ocr-clear" data-zone="order" aria-label="画像を消す">✕</button>
         </div>
-        <div class="ocr-result" id="ocrOrderResult">
-          <div class="ocr-result-title">読み取り完了 — フォームに自動入力しました</div>
+        <div class="ocr-result" id="ocrOrderResult" hidden>
           <div class="ocr-result-text" id="ocrOrderResultText"></div>
-          <button type="button" class="ocr-dl-btn" id="btnDlOrder"></button>
+          <button type="button" class="ocr-dl" id="btnDlOrder"></button>
         </div>
       </div>
 
-      <div class="field">
-        <label>購入先</label>
-        <div class="chip-group" id="segSupplier">
+      <div class="field"><span class="field-label">購入先</span>
+        <div class="chip-group">
           <label class="chip"><input type="radio" name="supplier" value="ASKUL"><span>ASKUL</span></label>
           <label class="chip"><input type="radio" name="supplier" value="Amazon"><span>Amazon</span></label>
           <label class="chip"><input type="radio" name="supplier" value="フォレストウェイ"><span>フォレストウェイ</span></label>
           <label class="chip"><input type="radio" name="supplier" value="その他"><span>その他</span></label>
         </div>
       </div>
-
-      <div class="field">
-        <label>部署</label>
-        <div class="chip-group" id="segDeptS"></div>
-      </div>
-
-      <div class="field"><label>品名</label><input id="iSName" placeholder="A4コピー用紙 など" autocomplete="off"></div>
-
+      <div class="field"><span class="field-label">部署</span><div class="chip-group" id="segDeptS"></div></div>
+      <div class="field"><label for="iSName">品名</label><input id="iSName" placeholder="A4コピー用紙 など" autocomplete="off"></div>
       <div class="grid2">
-        <div class="field"><label>注文数量</label><input id="iQty" type="number" min="1" placeholder="1" inputmode="numeric"></div>
-        <div class="field"><label>注文金額（円）</label><input id="iAmt" type="number" min="0" placeholder="0" inputmode="numeric"></div>
+        <div class="field"><label for="iQty">注文数量</label><input id="iQty" type="number" min="0" inputmode="numeric"></div>
+        <div class="field"><label for="iAmt">注文金額（円）</label><input id="iAmt" type="number" min="0" inputmode="numeric"></div>
       </div>
       <div class="grid2">
-        <div class="field"><label>注文日</label><input type="date" id="iSDate"></div>
-        <div class="field"><label>注文番号</label><input id="iOrderNo" placeholder="注文番号" autocomplete="off"></div>
+        <div class="field"><label for="iSDate">注文日</label><input type="date" id="iSDate"></div>
+        <div class="field"><label for="iOrderNo">注文番号</label><input id="iOrderNo" autocomplete="off"></div>
       </div>
-      <div class="field"><label>メモ</label><textarea id="iSMemo" rows="2" placeholder="管理番号・用途など"></textarea></div>
+      <div class="field"><label for="iSMemo">メモ</label><textarea id="iSMemo" rows="2" placeholder="管理番号・用途など"></textarea></div>
 
-      <!-- 納品照合（編集時のみ） -->
-      <div class="verify-zone" id="verifySection" style="display:none">
-        <div class="verify-zone-title">納品書を照合する</div>
+      <div class="ocr-zone is-verify" id="verifySection" hidden>
+        <div class="ocr-zone-head"><span class="t">納品書と照合</span><span class="s" id="ocrDelivStatus"></span></div>
         <div id="verifyResult"></div>
         <div class="ocr-btns">
-          <label class="ocr-pick-label" style="border-color:var(--amber-600);color:var(--amber-600);background:var(--amber-50)">
-            納品書を撮影
-            <input type="file" id="ocrDelivCamera" accept="image/*" capture="environment" style="display:none">
-          </label>
-          <label class="ocr-pick-label" style="border-color:var(--amber-600);color:var(--amber-600);background:var(--amber-50)">
-            PDF / 画像
-            <input type="file" id="ocrDelivFile" accept="image/*,application/pdf" style="display:none">
-          </label>
+          <label class="ocr-pick">納品書を撮影<input type="file" id="ocrDelivCamera" accept="image/*" capture="environment" hidden></label>
+          <label class="ocr-pick">PDF・画像を選択<input type="file" id="ocrDelivFile" accept="image/*,application/pdf" hidden></label>
         </div>
-        <div class="ocr-preview" id="ocrDelivPreview">
-          <img id="ocrDelivImg" alt="">
-          <button type="button" class="ocr-clear-btn" data-zone="deliv">✕</button>
+        <div class="bar" id="ocrDelivBarWrap" hidden><div class="bar-fill" id="ocrDelivBar"></div></div>
+        <div class="ocr-preview" id="ocrDelivPreview" hidden>
+          <img id="ocrDelivImg" alt="納品書のプレビュー">
+          <button type="button" class="ocr-clear" data-zone="deliv" aria-label="画像を消す">✕</button>
         </div>
-        <div class="ocr-result" id="ocrDelivResult" style="background:var(--amber-50);border-color:var(--amber-600)">
+        <div class="ocr-result" id="ocrDelivResult" hidden>
           <div class="ocr-result-text" id="ocrDelivResultText"></div>
-          <button type="button" class="ocr-dl-btn" id="btnDlDeliv" style="background:var(--amber-600)"></button>
+          <button type="button" class="ocr-dl" id="btnDlDeliv"></button>
         </div>
         <div class="grid2">
-          <div class="field"><label>納品数量</label><input id="iDelivQty" type="number" min="0" inputmode="numeric"></div>
-          <div class="field"><label>納品金額（円）</label><input id="iDelivAmt" type="number" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="iDelivQty">納品数量</label><input id="iDelivQty" type="number" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="iDelivAmt">納品金額（円）</label><input id="iDelivAmt" type="number" min="0" inputmode="numeric"></div>
         </div>
-        <div class="field"><label>到着日</label><input type="date" id="iDelivDate"></div>
-        <div class="field">
-          <label>状態</label>
+        <div class="field"><label for="iDelivDate">到着日</label><input type="date" id="iDelivDate"></div>
+        <div class="field"><span class="field-label">状態</span>
           <div class="chip-group">
             <label class="chip"><input type="radio" name="supplyStatus" value="発注済"><span>発注済</span></label>
             <label class="chip"><input type="radio" name="supplyStatus" value="受取済"><span>受取済</span></label>
@@ -408,7 +429,6 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
           </div>
         </div>
       </div>
-
     </div>
 
     <div class="form-actions">
@@ -424,391 +444,504 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
 const LS_LOGS = "devlog.logs";
 const DEPTS = ["本社","MB","KB","FB","BS","SB","CP","OS","HB","KM","EB","SE","YB","KE","DM","推進室"];
 const SUPPLIER_MAP = [
-  { code:"ASKL", label:"ASKUL",        keys:["askul","アスクル"] },
-  { code:"AMZN", label:"Amazon",       keys:["amazon","アマゾン"] },
+  { code:"ASKL", label:"ASKUL",          keys:["askul","アスクル"] },
+  { code:"AMZN", label:"Amazon",         keys:["amazon","アマゾン"] },
   { code:"FRST", label:"フォレストウェイ", keys:["フォレストウェイ","forestway"] },
 ];
-const LABEL_CLASS = {発注:"lbl-order",機種変更:"lbl-change",初期設定:"lbl-setup",貸与:"lbl-lend",返却:"lbl-return",修理:"lbl-repair",解約:"lbl-cancel",購入:"lbl-supply"};
 
 /* ===== ユーティリティ ===== */
 const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
 const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const today = () => new Date().toISOString().slice(0,10);
+const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
 const newId = () => "L" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 const fmtDate = d => d ? d.slice(5).replace('-','/') : "";
+const yen = n => "¥" + Number(n).toLocaleString();
+const num = v => v===""||v==null ? null : Number(v);
+const radioVal = name => document.querySelector(`input[name=${name}]:checked`)?.value || "";
+const setRadio = (name, v) => $$(`input[name=${name}]`).forEach(r => r.checked = r.value === v);
 
 function supplierToCode(name){
-  if(!name) return "OTHER";
-  const n = name.toLowerCase();
+  const n = (name||"").toLowerCase();
   for(const s of SUPPLIER_MAP) if(s.keys.some(k=>n.includes(k))) return s.code;
   return "OTHER";
 }
 function supplierFromText(text){
-  for(const s of SUPPLIER_MAP) if(s.keys.some(k=>text.toLowerCase().includes(k))) return s.label;
+  const t = text.toLowerCase().replace(/\s/g,"");
+  for(const s of SUPPLIER_MAP) if(s.keys.some(k=>t.includes(k))) return s.label;
   return null;
 }
 
-/* ===== 状態 ===== */
+let toastTimer;
+function toast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+/* ===== データ ===== */
 let logs = [], mode = "device", fMode = "device", editId = null;
-
 function lsLoad(){ try{ const l=localStorage.getItem(LS_LOGS); if(l) logs=JSON.parse(l)||[]; }catch(e){} }
-function lsSave(){ try{ localStorage.setItem(LS_LOGS, JSON.stringify(logs)); }catch(e){} }
-
+function lsSave(){ try{ localStorage.setItem(LS_LOGS, JSON.stringify(logs)); }catch(e){ alert("この端末に保存できませんでした（プライベートブラウズでは保存されません）"); } }
 function saveLog(id, data){
   const row = {id,...data};
   const idx = logs.findIndex(l=>l.id===id);
   if(idx>=0) logs[idx]=row; else logs.unshift(row);
-  lsSave(); render();
-  addLog("保存", "localStorage", `ID:${id}`);
+  lsSave(); render(); addLog("保存","この端末（localStorage）",`ID:${id}`);
 }
 function removeLog(id){
   logs = logs.filter(l=>l.id!==id);
-  lsSave(); render();
-  addLog("削除", "localStorage", `ID:${id}`);
+  lsSave(); render(); addLog("削除","この端末（localStorage）",`ID:${id}`);
 }
 
-/* ===== 描画 ===== */
+/* ===== 一覧 ===== */
 function buildChips(){
-  ["segDept","segDeptS"].forEach((id,i)=>{
-    const el = $("#"+id); if(!el) return;
-    const name = i===0?"dept":"deptS";
-    el.innerHTML = DEPTS.map(d=>`<label class="chip"><input type="radio" name="${name}" value="${esc(d)}"><span>${esc(d)}</span></label>`).join("");
+  [["segDept","dept"],["segDeptS","deptS"]].forEach(([id,name])=>{
+    $("#"+id).innerHTML = DEPTS.map(d=>`<label class="chip"><input type="radio" name="${name}" value="${esc(d)}"><span>${esc(d)}</span></label>`).join("");
   });
 }
-
-function statusClass(s){ return s==="完了"||s==="受取済"?"status-done":s==="差異あり"?"status-diff":"status-pend"; }
+const statusCls = s => s==="完了"||s==="受取済" ? "done" : s==="差異あり" ? "diff" : "";
+const hasDiff = l => (l.delivQty!=null&&l.quantity!=null&&Number(l.delivQty)!==Number(l.quantity)) ||
+                     (l.delivAmt!=null&&l.amount!=null&&Number(l.delivAmt)!==Number(l.amount));
 
 function render(){
   const dLogs = logs.filter(l=>l.logType!=="supply");
   const sLogs = logs.filter(l=>l.logType==="supply");
   $("#cntD").textContent = dLogs.length;
   $("#cntS").textContent = sLogs.length;
-  document.querySelectorAll(".tab-btn").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===mode));
+  $$(".tab-btn").forEach(b=>b.setAttribute("aria-pressed", b.dataset.m===mode));
+  $("#quickBar").hidden = mode!=="supply";
   const cur = mode==="supply" ? sLogs : dLogs;
-  if(!cur.length){
-    $("#list").innerHTML = '<div class="empty-state">まだ記録がありません</div>';
-    return;
-  }
+  if(!cur.length){ $("#list").innerHTML = '<div class="empty-state">まだ記録がありません</div>'; return; }
   $("#list").innerHTML = cur.map(l=>{
-    const lc = LABEL_CLASS[l.action||"購入"]||"lbl-supply";
-    const label = l.logType==="supply" ? "購入" : (l.action||"—");
     if(l.logType==="supply"){
-      const title = l.sName || l.supplier || "—";
-      const parts = [l.supplier, l.quantity?`${l.quantity}個`:null, l.amount?`¥${Number(l.amount).toLocaleString()}`:null].filter(Boolean);
-      const hasDiff = (l.delivQty!=null&&l.quantity!=null&&Number(l.delivQty)!==Number(l.quantity)) ||
-                      (l.delivAmt!=null&&l.amount!=null&&Number(l.delivAmt)!==Number(l.amount));
+      const parts = [l.supplier, l.quantity!=null?`${l.quantity}個`:null, l.amount!=null?yen(l.amount):null].filter(Boolean);
       return `<div class="list-row" data-id="${esc(l.id)}">
         <div>
           <div class="row-top">
-            <span class="row-label ${lc}">${esc(label)}</span>
-            <span class="row-title">${esc(title)}${hasDiff?` <span style="color:var(--red-600);font-size:11px">差異あり</span>`:""}  </span>
+            <span class="row-label">購入</span>
+            <span class="row-title">${esc(l.sName||l.supplier||"（品名未入力）")}</span>
+            ${l.dept?`<span class="row-dept">${esc(l.dept)}</span>`:""}
+            ${hasDiff(l)?`<span class="diff-mark">差異あり</span>`:""}
           </div>
           ${parts.length?`<div class="row-sub">${esc(parts.join(" · "))}</div>`:""}
         </div>
-        <div class="row-right">
-          <div class="row-date">${fmtDate(l.date)}</div>
-          <div class="row-status ${statusClass(l.status)}">${esc(l.status||"")}</div>
-        </div>
-      </div>`;
-    } else {
-      const sub = [l.category, l.model, l.number].filter(Boolean).join(" · ");
-      return `<div class="list-row" data-id="${esc(l.id)}">
-        <div>
-          <div class="row-top">
-            <span class="row-label ${lc}">${esc(label)}</span>
-            <span class="row-title">${esc(l.name||"（氏名未入力）")}</span>
-            ${l.dept?`<span style="font-size:11px;color:var(--text-muted)">${esc(l.dept)}</span>`:""}
-          </div>
-          ${sub?`<div class="row-sub">${esc(sub)}</div>`:""}
-        </div>
-        <div class="row-right">
-          <div class="row-date">${fmtDate(l.date)}</div>
-          <div class="row-status ${statusClass(l.status)}">${esc(l.status||"")}</div>
-        </div>
+        <div class="row-right"><div class="row-date">${fmtDate(l.date)}</div><div class="row-status ${statusCls(l.status)}">${esc(l.status||"")}</div></div>
       </div>`;
     }
+    const sub = [l.category, l.model, l.number].filter(Boolean).join(" · ");
+    return `<div class="list-row" data-id="${esc(l.id)}">
+      <div>
+        <div class="row-top">
+          <span class="row-label${l.action==="解約"?" is-cancel":""}">${esc(l.action||"—")}</span>
+          <span class="row-title">${esc(l.name||"（氏名未入力）")}</span>
+          ${l.dept?`<span class="row-dept">${esc(l.dept)}</span>`:""}
+        </div>
+        ${sub?`<div class="row-sub">${esc(sub)}</div>`:""}
+      </div>
+      <div class="row-right"><div class="row-date">${fmtDate(l.date)}</div><div class="row-status ${statusCls(l.status)}">${esc(l.status||"")}</div></div>
+    </div>`;
   }).join("");
 }
 
 /* ===== フォーム ===== */
 function setFMode(m){
   fMode=m;
-  $("#secDevice").hidden=m!=="device";
-  $("#secSupply").hidden=m!=="supply";
-  document.querySelectorAll(".dlg-tab").forEach(b=>b.setAttribute("aria-pressed",b.dataset.fm===m));
+  $("#secDevice").hidden = m!=="device";
+  $("#secSupply").hidden = m!=="supply";
+  $$(".dlg-tab").forEach(b=>b.setAttribute("aria-pressed", b.dataset.fm===m));
 }
 
-function openForm(pre={}){
+function openForm(pre={}, opts={}){
   editId = pre.id||null;
-  const m = pre.logType==="supply"?"supply":"device";
+  const m = pre.logType==="supply" ? "supply" : "device";
   setFMode(m); buildChips();
-  $("#dlgTitle").textContent = editId?"記録を編集":"新規記録";
+  $("#dlgTitle").textContent = opts.title || (editId?"記録を編集":"新規記録");
   $("#btnDel").hidden = !editId;
   resetOcr("order"); resetOcr("deliv");
   if(m==="device"){
-    document.querySelectorAll('input[name=cat]').forEach(r=>r.checked=r.value===(pre.category||""));
-    document.querySelectorAll('input[name=act]').forEach(r=>r.checked=r.value===(pre.action||""));
-    document.querySelectorAll('input[name=dept]').forEach(r=>r.checked=r.value===(pre.dept||""));
-    document.querySelectorAll('input[name=status]').forEach(r=>r.checked=r.value===(pre.status||"完了"));
+    setRadio("cat",pre.category||""); setRadio("act",pre.action||""); setRadio("dept",pre.dept||""); setRadio("status",pre.status||"完了");
     $("#iName").value=pre.name||""; $("#iNo").value=pre.number||""; $("#iModel").value=pre.model||"";
     $("#iDate").value=pre.date||today(); $("#iMemo").value=pre.memo||"";
   } else {
-    document.querySelectorAll('input[name=supplier]').forEach(r=>r.checked=r.value===(pre.supplier||""));
-    document.querySelectorAll('input[name=deptS]').forEach(r=>r.checked=r.value===(pre.dept||""));
-    document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value===(pre.status||"発注済"));
-    $("#iSName").value=pre.sName||""; $("#iQty").value=pre.quantity||""; $("#iAmt").value=pre.amount||"";
+    setRadio("supplier",pre.supplier||""); setRadio("deptS",pre.dept||""); setRadio("supplyStatus",pre.status||"発注済");
+    $("#iSName").value=pre.sName||""; $("#iQty").value=pre.quantity??""; $("#iAmt").value=pre.amount??"";
     $("#iSDate").value=pre.date||today(); $("#iOrderNo").value=pre.orderNo||""; $("#iSMemo").value=pre.sMemo||"";
-    $("#verifySection").style.display=editId?"":"none";
-    if(editId){
-      $("#iDelivQty").value=pre.delivQty||""; $("#iDelivAmt").value=pre.delivAmt||""; $("#iDelivDate").value=pre.deliveryDate||"";
-      renderVerifyResult(pre);
-    }
+    $("#iDelivQty").value=pre.delivQty??""; $("#iDelivAmt").value=pre.delivAmt??""; $("#iDelivDate").value=pre.deliveryDate||"";
+    $("#verifySection").hidden = !(editId || opts.verify);
+    renderVerify();
   }
-  $("#dlg").showModal();
+  if(!$("#dlg").open) $("#dlg").showModal();
 }
 
-function renderVerifyResult(log){
-  const r=$("#verifyResult");
-  if(!log.delivQty&&!log.delivAmt){ r.innerHTML=""; return; }
-  const qOk=log.quantity==null||log.delivQty==null||Number(log.quantity)===Number(log.delivQty);
-  const aOk=log.amount==null||log.delivAmt==null||Number(log.amount)===Number(log.delivAmt);
-  if(qOk&&aOk) r.innerHTML=`<div class="verify-banner verify-ok">注文と一致しています</div>`;
-  else {
-    const ms=[];
-    if(!qOk) ms.push(`数量: 注文${log.quantity} → 納品${log.delivQty}`);
-    if(!aOk) ms.push(`金額: 注文¥${Number(log.amount).toLocaleString()} → 納品¥${Number(log.delivAmt).toLocaleString()}`);
-    r.innerHTML=`<div class="verify-banner verify-ng">差異 — ${ms.join(" / ")}</div>`;
-  }
+/* 注文と納品の数値を比べて表示・状態を更新 */
+function renderVerify(autoStatus=false){
+  const oq=num($("#iQty").value), oa=num($("#iAmt").value), dq=num($("#iDelivQty").value), da=num($("#iDelivAmt").value);
+  const el=$("#verifyResult");
+  if(dq==null && da==null){ el.innerHTML=""; return; }
+  const ms=[];
+  if(oq!=null && dq!=null && oq!==dq) ms.push(`数量 注文${oq} / 納品${dq}`);
+  if(oa!=null && da!=null && oa!==da) ms.push(`金額 注文${yen(oa)} / 納品${yen(da)}`);
+  el.innerHTML = ms.length
+    ? `<div class="verify-banner verify-ng">差異があります — ${esc(ms.join("、"))}</div>`
+    : `<div class="verify-banner verify-ok">注文内容と一致しています</div>`;
+  if(autoStatus) setRadio("supplyStatus", ms.length ? "差異あり" : "受取済");
 }
+["iQty","iAmt","iDelivQty","iDelivAmt"].forEach(id=>$("#"+id).addEventListener("input",()=>renderVerify(true)));
 
-/* 送信 */
 $("#frm").addEventListener("submit", e=>{
   e.preventDefault();
-  const btn=$("#btnSave"); btn.disabled=true;
-  try{
-    if(fMode==="supply"){
-      const dqty=$("#iDelivQty").value?Number($("#iDelivQty").value):null;
-      const damt=$("#iDelivAmt").value?Number($("#iDelivAmt").value):null;
-      saveLog(editId||newId(),{
-        logType:"supply",
-        supplier:document.querySelector('input[name=supplier]:checked')?.value||"",
-        dept:document.querySelector('input[name=deptS]:checked')?.value||"",
-        sName:$("#iSName").value.trim(), quantity:$("#iQty").value?Number($("#iQty").value):null,
-        amount:$("#iAmt").value?Number($("#iAmt").value):null, date:$("#iSDate").value||today(),
-        orderNo:$("#iOrderNo").value.trim()||null, sMemo:$("#iSMemo").value.trim(),
-        delivQty:dqty, delivAmt:damt, deliveryDate:$("#iDelivDate").value||null,
-        status:document.querySelector('input[name=supplyStatus]:checked')?.value||"発注済",
-        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(), updatedAt:Date.now()
-      });
-    } else {
-      saveLog(editId||newId(),{
-        logType:"device",
-        category:document.querySelector('input[name=cat]:checked')?.value||"",
-        action:document.querySelector('input[name=act]:checked')?.value||"",
-        dept:document.querySelector('input[name=dept]:checked')?.value||"",
-        name:$("#iName").value.trim(), number:$("#iNo").value.trim(), model:$("#iModel").value.trim(),
-        date:$("#iDate").value||today(), status:document.querySelector('input[name=status]:checked')?.value||"完了",
-        memo:$("#iMemo").value.trim(),
-        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(), updatedAt:Date.now()
-      });
-    }
-    $("#dlg").close();
-  }finally{ btn.disabled=false; }
+  const prev = editId ? logs.find(l=>l.id===editId) : null;
+  const base = { createdAt: prev?.createdAt||Date.now(), updatedAt: Date.now() };
+  if(fMode==="supply"){
+    saveLog(editId||newId(), { logType:"supply",
+      supplier:radioVal("supplier"), dept:radioVal("deptS"), sName:$("#iSName").value.trim(),
+      quantity:num($("#iQty").value), amount:num($("#iAmt").value), date:$("#iSDate").value||today(),
+      orderNo:$("#iOrderNo").value.trim()||null, sMemo:$("#iSMemo").value.trim(),
+      delivQty:num($("#iDelivQty").value), delivAmt:num($("#iDelivAmt").value), deliveryDate:$("#iDelivDate").value||null,
+      status:radioVal("supplyStatus")||"発注済", ...base });
+  } else {
+    saveLog(editId||newId(), { logType:"device",
+      category:radioVal("cat"), action:radioVal("act"), dept:radioVal("dept"),
+      name:$("#iName").value.trim(), number:$("#iNo").value.trim(), model:$("#iModel").value.trim(),
+      date:$("#iDate").value||today(), status:radioVal("status")||"完了", memo:$("#iMemo").value.trim(), ...base });
+  }
+  mode = fMode; render();
+  $("#dlg").close(); toast("保存しました");
 });
 
-/* リスト操作 */
 $("#list").addEventListener("click", e=>{
   const row=e.target.closest(".list-row"); if(!row) return;
-  const l=logs.find(x=>x.id===row.dataset.id); if(!l) return;
-  openForm(l);
+  const l=logs.find(x=>x.id===row.dataset.id); if(l) openForm(l);
 });
 $("#btnDel").onclick=()=>{ if(!editId||!confirm("この記録を削除しますか？")) return; removeLog(editId); $("#dlg").close(); };
-
-/* ダイアログ */
-["btnNew","fabNew"].forEach(id=>{ const b=$("#"+id); if(b) b.onclick=()=>openForm({logType:mode==="supply"?"supply":"device"}); });
+["btnNew","fabNew"].forEach(id=>$("#"+id).onclick=()=>openForm({logType:mode==="supply"?"supply":"device"}));
 $("#btnDlgX").onclick=()=>$("#dlg").close();
 $("#btnCancel").onclick=()=>$("#dlg").close();
-document.querySelectorAll(".dlg-tab").forEach(b=>b.onclick=()=>setFMode(b.dataset.fm));
-document.querySelectorAll(".tab-btn").forEach(b=>b.onclick=()=>{ mode=b.dataset.m; render(); });
+$("#dlg").addEventListener("close",()=>{ ocrFiles.order=null; ocrFiles.deliv=null; });
+$$(".dlg-tab").forEach(b=>b.onclick=()=>setFMode(b.dataset.fm));
+$$(".tab-btn").forEach(b=>b.onclick=()=>{ mode=b.dataset.m; render(); });
 
-/* ===== OCR ===== */
-let ocrWorker=null;
-const ocrFiles={order:null,deliv:null};
+/* ===== OCR（すべて端末内で処理） ===== */
+let ocrWorker=null, workerPromise=null, progressCb=null;
+const ocrFiles={order:null, deliv:null};   // 電帳法ファイル保存用にメモリ上だけで保持（保存はしない）
 
-async function getWorker(){
-  if(ocrWorker) return ocrWorker;
-  ocrWorker = await Tesseract.createWorker(["jpn","eng"],1,{});
-  return ocrWorker;
+function getWorker(){
+  if(ocrWorker) return Promise.resolve(ocrWorker);
+  if(!workerPromise){
+    workerPromise = Tesseract.createWorker(["jpn","eng"], 1, { logger: m => { if(progressCb) progressCb(m); } })
+      .then(w=>{ ocrWorker=w; return w; })
+      .catch(e=>{ workerPromise=null; throw e; });
+  }
+  return workerPromise;
+}
+
+function makeProgress(barEl, labelEl){
+  return m=>{
+    const recog = m.status==="recognizing text";
+    const p = recog ? .25 + .75*(m.progress||0) : .25*(m.progress||0);
+    if(barEl) barEl.style.width = Math.round(p*100)+"%";
+    if(labelEl) labelEl.textContent = recog ? "認識しています…" : "準備しています…";
+  };
 }
 
 async function fileToCanvas(file){
   if(file.type==="application/pdf"){
-    const ab=await file.arrayBuffer();
-    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
-    const page=await pdf.getPage(1);
-    const vp=page.getViewport({scale:2});
-    const c=document.createElement("canvas"); c.width=vp.width; c.height=vp.height;
-    await page.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;
+    const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+    const page = await pdf.getPage(1);
+    const vp = page.getViewport({scale:2});
+    const c = document.createElement("canvas"); c.width=vp.width; c.height=vp.height;
+    await page.render({canvasContext:c.getContext("2d"), viewport:vp}).promise;
     return c;
-  } else {
-    return new Promise((res,rej)=>{
-      const img=new Image(), url=URL.createObjectURL(file);
-      img.onload=()=>{ const c=document.createElement("canvas"); c.width=img.width; c.height=img.height; c.getContext("2d").drawImage(img,0,0); URL.revokeObjectURL(url); res(c); };
-      img.onerror=rej; img.src=url;
-    });
   }
+  return new Promise((res,rej)=>{
+    const img=new Image(), url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const k=Math.min(1, 2200/Math.max(img.width,img.height));   // 大きすぎる写真は縮小して高速化
+      const c=document.createElement("canvas"); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(url); res(c);
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error("画像を開けませんでした")); };
+    img.src=url;
+  });
 }
 
-function parseText(text){
+function parseText(raw){
+  const text = raw.replace(/[，]/g,",").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0));
   const r={};
   const sv=supplierFromText(text); if(sv) r.supplier=sv;
-  const ams=[...text.matchAll(/[¥￥]?\s?(\d{1,3}(?:,\d{3})+|\d{3,})\s?円?/g)];
-  if(ams.length){ const ns=ams.map(m=>parseInt(m[1].replace(/,/g,""),10)).filter(n=>n>100&&n<10000000); if(ns.length) r.amount=Math.max(...ns); }
-  const qm=text.match(/(\d+)\s*(?:個|枚|本|冊|箱|セット)/); if(qm) r.quantity=parseInt(qm[1],10);
-  const dm=text.match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/); if(dm) r.date=`${dm[1]}-${dm[2].padStart(2,"0")}-${dm[3].padStart(2,"0")}`;
-  const om=text.match(/(?:注文番号|注文No\.?|Order\s*No\.?|Order#|発注番号)[\s:：]?\s?([A-Z0-9\-]{5,20})/i); if(om) r.orderNo=om[1];
-  const lines=text.split(/\n/).map(l=>l.trim()).filter(l=>l.length>4&&l.length<60&&!/^\d+$/.test(l)&&!/合計|送料|税|消費税|注文|領収|請求|TOTAL/i.test(l));
+  const tot = text.match(/(?:合計|総額|ご請求|請求金額|お支払|税込)[^\d\n]{0,12}([\d,]{3,})/);
+  if(tot) r.amount = parseInt(tot[1].replace(/,/g,""),10);
+  if(!r.amount){
+    const ns=[...text.matchAll(/[¥￥]\s?([\d,]{3,})|([\d,]{3,})\s?円/g)].map(m=>parseInt((m[1]||m[2]).replace(/,/g,""),10)).filter(n=>n>=100&&n<10000000);
+    if(ns.length) r.amount=Math.max(...ns);
+  }
+  const qm=text.match(/(?:数量|個数)[^\d\n]{0,6}(\d{1,4})/) || text.match(/(\d{1,4})\s*(?:個|枚|本|冊|箱|セット|パック|袋)/);
+  if(qm) r.quantity=parseInt(qm[1],10);
+  const dm=text.match(/(20\d{2})\s*[\/\-年.]\s*(\d{1,2})\s*[\/\-月.]\s*(\d{1,2})/);
+  if(dm) r.date=`${dm[1]}-${dm[2].padStart(2,"0")}-${dm[3].padStart(2,"0")}`;
+  const om=text.match(/(?:注文番号|ご注文番号|注文No\.?|Order\s*No\.?|Order#|発注番号|伝票番号)[\s:：#]*([A-Z0-9][A-Z0-9\-]{4,24})/i);
+  if(om) r.orderNo=om[1];
+  const lines=text.split(/\n/).map(l=>l.trim()).filter(l=>l.length>4&&l.length<60&&/[ぁ-んァ-ヶ一-龠A-Za-z]/.test(l)&&!/合計|小計|送料|税|注文|領収|請求|納品|株式会社|住所|電話|TEL|〒|TOTAL|様/i.test(l));
   if(lines.length) r.sName=lines.sort((a,b)=>b.length-a.length)[0];
   return r;
 }
 
-function makeFileName(parsed, origName){
-  const code=supplierToCode(parsed.supplier||"");
-  const date=(parsed.date||today()).replace(/-/g,"");
-  const amt=parsed.amount?String(parsed.amount):"0";
-  const ext=(origName||"").match(/\.pdf$/i)?".pdf":".jpg";
-  return `${code}-${date}-${amt}${ext}`;
+function makeFileName(p, origName, suffix=""){
+  const code=supplierToCode(p.supplier);
+  const date=(p.date||today()).replace(/-/g,"");
+  const amt=p.amount!=null ? String(p.amount) : "0";
+  const ext=/\.pdf$/i.test(origName||"") ? ".pdf" : (/\.png$/i.test(origName||"") ? ".png" : ".jpg");
+  return `${code}-${date}-${amt}${suffix}${ext}`;
+}
+
+async function ocrFile(file, cb){
+  progressCb = cb;
+  try{
+    const canvas = await fileToCanvas(file);
+    const preview = canvas.toDataURL("image/jpeg",.7);
+    const w = await getWorker();
+    const { data } = await w.recognize(canvas);
+    canvas.width=0; canvas.height=0;
+    addLog("OCR","端末内（Tesseract.js）",`${(data.text||"").length}文字を読み取り・画像は外部送信なし`);
+    return { file, preview, parsed: parseText(data.text||"") };
+  } finally { progressCb = null; }
+}
+
+function setDl(sel, fname, zone){
+  const b=$(sel);
+  b.textContent = `${fname} として保存`;
+  b.onclick = ()=>{
+    const f=ocrFiles[zone]; if(!f) return;
+    const url=URL.createObjectURL(f), a=document.createElement("a");
+    a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    addLog("電帳法ファイル保存","端末のダウンロード",fname);
+  };
 }
 
 function resetOcr(zone){
-  const isO=zone==="order";
-  $("#"+(isO?"ocrOrderPreview":"ocrDelivPreview")).style.display="none";
-  $("#"+(isO?"ocrOrderResult":"ocrDelivResult")).style.display="none";
-  const st=document.getElementById(isO?"ocrOrderStatus":"ocrDelivStatus"); if(st) st.textContent="";
+  const z = zone==="order" ? "Order" : "Deliv";
+  $(`#ocr${z}Preview`).hidden=true; $(`#ocr${z}Result`).hidden=true; $(`#ocr${z}BarWrap`).hidden=true;
+  $(`#ocr${z}Status`).textContent=""; $(`#ocr${z}Img`).removeAttribute("src");
   ocrFiles[zone]=null;
 }
 
-async function runOcr(file,zone){
-  const isO=zone==="order";
-  const stId=isO?"ocrOrderStatus":"ocrDelivStatus";
-  const prevId=isO?"ocrOrderPreview":"ocrDelivPreview";
-  const imgId=isO?"ocrOrderImg":"ocrDelivImg";
-  const resId=isO?"ocrOrderResult":"ocrDelivResult";
-  const resTxtId=isO?"ocrOrderResultText":"ocrDelivResultText";
-  const dlId=isO?"btnDlOrder":"btnDlDeliv";
-  document.getElementById(stId).textContent="処理中…";
-  $("#"+resId).style.display="none";
-  try{
-    const canvas=await fileToCanvas(file);
-    document.getElementById(imgId).src=canvas.toDataURL("image/jpeg",.7);
-    $("#"+prevId).style.display="";
-    const worker=await getWorker();
-    const {data}=await worker.recognize(canvas);
-    document.getElementById(stId).textContent="完了";
-    addLog("OCR", "Tesseract.js（ローカル）", `${isO?"注文書":"納品書"} ${data.text.length}文字 / 外部送信なし`);
-    const parsed=parseText(data.text||"");
-    if(isO){
-      if(parsed.supplier) document.querySelectorAll('input[name=supplier]').forEach(r=>r.checked=r.value===parsed.supplier);
-      if(parsed.amount)   $("#iAmt").value=parsed.amount;
-      if(parsed.quantity) $("#iQty").value=parsed.quantity;
-      if(parsed.date)     $("#iSDate").value=parsed.date;
-      if(parsed.orderNo)  $("#iOrderNo").value=parsed.orderNo;
-      if(parsed.sName&&!$("#iSName").value) $("#iSName").value=parsed.sName;
-      const lines=[parsed.supplier&&`購入先: ${parsed.supplier}`,parsed.date&&`日付: ${parsed.date}`,parsed.amount&&`金額: ¥${Number(parsed.amount).toLocaleString()}`,parsed.quantity&&`数量: ${parsed.quantity}個`,parsed.orderNo&&`注文番号: ${parsed.orderNo}`].filter(Boolean);
-      document.getElementById(resTxtId).textContent=lines.join("  /  ")||"情報を読み取れませんでした";
-      ocrFiles.order=file;
-      const fname=makeFileName(parsed,file.name);
-      const dl=$("#"+dlId); dl.textContent=`${fname} をダウンロード`; dl.style.display=""; dl.onclick=()=>{ const url=URL.createObjectURL(ocrFiles.order); const a=document.createElement("a"); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url); };
-    } else {
-      const dqty=parsed.quantity||null, damt=parsed.amount||null;
-      if(dqty) $("#iDelivQty").value=dqty;
-      if(damt) $("#iDelivAmt").value=damt;
-      if(parsed.date) $("#iDelivDate").value=parsed.date;
-      const oqty=$("#iQty").value?Number($("#iQty").value):null, oamt=$("#iAmt").value?Number($("#iAmt").value):null;
-      const qOk=oqty==null||dqty==null||oqty===dqty, aOk=oamt==null||damt==null||oamt===damt;
-      let banner="";
-      if(qOk&&aOk){ banner=`<div class="verify-banner verify-ok">注文と一致しています</div>`; document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value==="受取済"); }
-      else { const ms=[!qOk&&`数量: 注文${oqty} → 納品${dqty}`,!aOk&&`金額: ¥${Number(oamt).toLocaleString()} → ¥${Number(damt).toLocaleString()}`].filter(Boolean); banner=`<div class="verify-banner verify-ng">差異 — ${ms.join(" / ")}</div>`; document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value==="差異あり"); }
-      const lines=[damt&&`金額: ¥${Number(damt).toLocaleString()}`,dqty&&`数量: ${dqty}個`,parsed.date&&`日付: ${parsed.date}`].filter(Boolean);
-      document.getElementById(resTxtId).innerHTML=banner+(lines.length?`<div style="margin-top:4px">${lines.join("  /  ")}</div>`:"");
-      $("#verifyResult").innerHTML="";
-      ocrFiles.deliv=file;
-      const fname=makeFileName({supplier:document.querySelector('input[name=supplier]:checked')?.value,date:parsed.date,amount:damt},file.name).replace(/\./,"-納品書.");
-      const dl=$("#"+dlId); dl.textContent=`${fname} をダウンロード`; dl.style.display=""; dl.onclick=()=>{ const url=URL.createObjectURL(ocrFiles.deliv); const a=document.createElement("a"); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url); };
-    }
-    $("#"+resId).style.display="";
-    canvas.width=0; canvas.height=0;
-  }catch(err){ document.getElementById(stId).textContent="エラー"; alert("読み取りに失敗しました: "+err.message); }
+function fillOrderFields(p){
+  if(p.supplier) setRadio("supplier",p.supplier);
+  if(p.amount!=null) $("#iAmt").value=p.amount;
+  if(p.quantity!=null) $("#iQty").value=p.quantity;
+  if(p.date) $("#iSDate").value=p.date;
+  if(p.orderNo) $("#iOrderNo").value=p.orderNo;
+  if(p.sName && !$("#iSName").value) $("#iSName").value=p.sName;
 }
 
-document.addEventListener("change",e=>{
-  const t=e.target;
-  if(t.id==="ocrOrderCamera"||t.id==="ocrOrderFile"){ const f=t.files?.[0]; if(f) runOcr(f,"order"); t.value=""; }
-  if(t.id==="ocrDelivCamera"||t.id==="ocrDelivFile"){ const f=t.files?.[0]; if(f) runOcr(f,"deliv"); t.value=""; }
+function applyOrder(res){
+  const p=res.parsed;
+  fillOrderFields(p);
+  $("#ocrOrderImg").src=res.preview; $("#ocrOrderPreview").hidden=false;
+  const items=[p.supplier&&`購入先 ${p.supplier}`, p.date&&`日付 ${p.date}`, p.amount!=null&&`金額 ${yen(p.amount)}`, p.quantity!=null&&`数量 ${p.quantity}`, p.orderNo&&`注文番号 ${p.orderNo}`].filter(Boolean);
+  $("#ocrOrderResultText").textContent = items.length ? `自動入力しました：${items.join("、")}。内容を確認して保存してください。` : "読み取れた項目がありませんでした。手入力してください。";
+  ocrFiles.order=res.file;
+  setDl("#btnDlOrder", makeFileName({supplier:radioVal("supplier")||p.supplier, date:$("#iSDate").value, amount:num($("#iAmt").value)}, res.file.name), "order");
+  $("#ocrOrderResult").hidden=false; $("#ocrOrderStatus").textContent="読み取り完了";
+}
+
+function applyDeliv(res){
+  const p=res.parsed;
+  if(p.quantity!=null) $("#iDelivQty").value=p.quantity;
+  if(p.amount!=null) $("#iDelivAmt").value=p.amount;
+  $("#iDelivDate").value = p.date || today();
+  renderVerify(true);
+  $("#ocrDelivImg").src=res.preview; $("#ocrDelivPreview").hidden=false;
+  const items=[p.amount!=null&&`金額 ${yen(p.amount)}`, p.quantity!=null&&`数量 ${p.quantity}`, p.date&&`日付 ${p.date}`].filter(Boolean);
+  $("#ocrDelivResultText").textContent = items.length ? `納品書から読み取り：${items.join("、")}` : "数量・金額を読み取れませんでした。手入力してください。";
+  ocrFiles.deliv=res.file;
+  setDl("#btnDlDeliv", makeFileName({supplier:radioVal("supplier")||p.supplier, date:p.date||today(), amount:num($("#iDelivAmt").value)}, res.file.name, "-納品書"), "deliv");
+  $("#ocrDelivResult").hidden=false; $("#ocrDelivStatus").textContent="読み取り完了";
+}
+
+/* フォーム内の読み取りボタン */
+async function formOcr(file, zone){
+  const z = zone==="order" ? "Order" : "Deliv";
+  const wrap=$(`#ocr${z}BarWrap`), bar=$(`#ocr${z}Bar`), st=$(`#ocr${z}Status`);
+  wrap.hidden=false; bar.style.width="0"; st.textContent="準備しています…";
+  try{ const res=await ocrFile(file, makeProgress(bar, st)); zone==="order" ? applyOrder(res) : applyDeliv(res); }
+  catch(err){ st.textContent="読み取りに失敗しました"; addLog("OCR失敗","端末内",err.message,false); }
+  finally{ wrap.hidden=true; }
+}
+document.addEventListener("change", e=>{
+  const t=e.target, f=t.files?.[0];
+  if(!f) return;
+  if(t.id==="ocrOrderCamera"||t.id==="ocrOrderFile") formOcr(f,"order");
+  else if(t.id==="ocrDelivCamera"||t.id==="ocrDelivFile") formOcr(f,"deliv");
+  else if(t.id==="scanCamera"||t.id==="scanFile") scanFlow(f);
+  else return;
+  t.value="";
 });
-document.addEventListener("click",e=>{ const b=e.target.closest(".ocr-clear-btn"); if(b) resetOcr(b.dataset.zone); });
+document.addEventListener("click", e=>{ const b=e.target.closest(".ocr-clear"); if(b) resetOcr(b.dataset.zone); });
+
+/* ===== 撮影画面（QR → 撮影 → 認識 → 入力済みフォーム） ===== */
+let scanKind=null, pendingDeliv=null;
+const SCAN_TEXT = {
+  order: { kicker:"発注", title:"注文書を撮影", desc:"注文書・請求書の全体が入るように撮影してください。購入先・金額・数量などが自動で入力されます。" },
+  deliv: { kicker:"納品", title:"納品書を撮影", desc:"届いた納品書を撮影してください。該当する発注を探して、数量・金額を自動で照合します。" },
+};
+function openScan(kind){
+  scanKind=kind;
+  const t=SCAN_TEXT[kind];
+  $("#scanKicker").textContent=t.kicker; $("#scanTitle").textContent=t.title; $("#scanDesc").textContent=t.desc;
+  $("#scanScreen").classList.add("open");
+  getWorker().catch(()=>{});   // 構えている間に読み取りエンジンを準備
+}
+function closeScan(){
+  $("#scanScreen").classList.remove("open");
+  if(location.search) history.replaceState(null,"",location.pathname);
+}
+$("#scanCancel").onclick=closeScan;
+$$("[data-scan]").forEach(b=>b.onclick=()=>openScan(b.dataset.scan));
+
+async function scanFlow(file){
+  const kind=scanKind; closeScan();
+  mode="supply"; render();
+  $("#busyBar").style.width="0"; $("#busyTitle").textContent="準備しています…";
+  $("#busy").classList.add("open");
+  let res;
+  try{ res = await ocrFile(file, makeProgress($("#busyBar"), $("#busyTitle"))); }
+  catch(err){
+    $("#busy").classList.remove("open");
+    addLog("OCR失敗","端末内",err.message,false);
+    alert("読み取りに失敗しました。もう一度撮影してください。");
+    openScan(kind); return;
+  }
+  $("#busy").classList.remove("open");
+  if(kind==="order"){
+    openForm({logType:"supply"}, {title:"発注を記録"});
+    applyOrder(res);
+  } else routeDeliv(res);
+}
+
+/* 納品書 → 該当する発注を探す */
+function findCandidates(p){
+  return logs.filter(l=>l.logType==="supply" && l.status!=="受取済").map(l=>{
+    let s=0;
+    if(p.orderNo && l.orderNo && p.orderNo.replace(/-/g,"")===l.orderNo.replace(/-/g,"")) s+=100;
+    if(p.supplier && l.supplier===p.supplier) s+=20;
+    if(p.amount!=null && l.amount!=null && Number(l.amount)===p.amount) s+=40;
+    if(p.quantity!=null && l.quantity!=null && Number(l.quantity)===p.quantity) s+=10;
+    return {l,s};
+  }).sort((a,b)=>b.s-a.s || (b.l.date||"").localeCompare(a.l.date||""));
+}
+function routeDeliv(res){
+  const c=findCandidates(res.parsed);
+  const top=c[0], second=c[1];
+  if(top && (top.s>=100 || (top.s>=60 && (!second || second.s<top.s)))){
+    openDelivFor(top.l, res); return;
+  }
+  pendingDeliv=res;
+  const p=res.parsed;
+  const info=[p.supplier, p.amount!=null&&yen(p.amount), p.quantity!=null&&`${p.quantity}個`].filter(Boolean).join("・");
+  $("#pickInfo").textContent = (info ? `納品書の読み取り結果：${info}。` : "") + (c.length ? "照合する発注を選んでください。" : "未受取の発注がありません。");
+  $("#pickList").innerHTML = c.slice(0,8).map(({l})=>`
+    <button class="pick-row" type="button" data-id="${esc(l.id)}">
+      <span class="t">${esc(l.sName||"（品名未入力）")}</span><span class="s">${fmtDate(l.date)}</span>
+      <span class="s">${esc([l.supplier, l.quantity!=null&&`${l.quantity}個`, l.amount!=null&&yen(l.amount)].filter(Boolean).join(" · "))}</span><span></span>
+    </button>`).join("");
+  $("#pickOverlay").classList.add("open");
+}
+function openDelivFor(log, res){
+  openForm(log, {title:"納品を照合", verify:true});
+  applyDeliv(res);
+  $("#verifySection").scrollIntoView({block:"start", behavior:"smooth"});
+}
+$("#pickList").addEventListener("click", e=>{
+  const b=e.target.closest(".pick-row"); if(!b||!pendingDeliv) return;
+  const l=logs.find(x=>x.id===b.dataset.id);
+  $("#pickOverlay").classList.remove("open");
+  if(l) openDelivFor(l, pendingDeliv);
+  pendingDeliv=null;
+});
+$("#pickNew").onclick=()=>{
+  if(!pendingDeliv) return;
+  const res=pendingDeliv; pendingDeliv=null;
+  $("#pickOverlay").classList.remove("open");
+  openForm({logType:"supply"}, {title:"納品を記録", verify:true});
+  fillOrderFields(res.parsed);
+  applyDeliv(res);
+};
+$("#pickClose").onclick=()=>{ pendingDeliv=null; $("#pickOverlay").classList.remove("open"); };
 
 /* ===== Excel ===== */
 $("#btnExcel").onclick=()=>{
   if(!logs.length){ alert("データがありません"); return; }
   const wb=XLSX.utils.book_new();
-  const dRows=logs.filter(l=>l.logType!=="supply");
-  const sRows=logs.filter(l=>l.logType==="supply");
+  const dRows=logs.filter(l=>l.logType!=="supply"), sRows=logs.filter(l=>l.logType==="supply");
   const wsD=XLSX.utils.aoa_to_sheet([
-    ["日付","種別","手続き","部署","担当者","電話番号","機種","状態","メモ"],
+    ["日付","種別","手続き","部署","担当者","端末番号","機種","状態","メモ"],
     ...dRows.map(r=>[r.date||"",r.category||"",r.action||"",r.dept||"",r.name||"",r.number||"",r.model||"",r.status||"",r.memo||""])
   ]);
-  wsD["!cols"]=[10,10,10,10,12,14,16,8,20].map(w=>({wch:w}));
+  wsD["!cols"]=[10,10,10,8,12,14,16,8,24].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,wsD,"端末・ライセンス");
   const wsS=XLSX.utils.aoa_to_sheet([
-    ["注文日","品名","購入先","部署","注文数量","注文金額","注文番号","納品日","納品数量","納品金額","状態","メモ"],
-    ...sRows.map(r=>[r.date||"",r.sName||"",r.supplier||"",r.dept||"",r.quantity??"",r.amount??"",r.orderNo||"",r.deliveryDate||"",r.delivQty??"",r.delivAmt??"",r.status||"",r.sMemo||""])
+    ["注文日","品名","購入先","部署","注文数量","注文金額","注文番号","到着日","納品数量","納品金額","照合","状態","メモ"],
+    ...sRows.map(r=>[r.date||"",r.sName||"",r.supplier||"",r.dept||"",r.quantity??"",r.amount??"",r.orderNo||"",r.deliveryDate||"",r.delivQty??"",r.delivAmt??"",(r.delivQty==null&&r.delivAmt==null)?"":(hasDiff(r)?"差異あり":"一致"),r.status||"",r.sMemo||""])
   ]);
-  wsS["!cols"]=[10,20,12,10,8,10,14,10,8,10,8,20].map(w=>({wch:w}));
+  wsS["!cols"]=[10,24,12,8,8,10,16,10,8,10,8,8,24].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,wsS,"備品・消耗品");
-  XLSX.writeFile(wb,`手続き備品ログ_${new Date().toISOString().slice(0,10).replace(/-/g,"")}.xlsx`);
-  addLog("Excel出力","ローカル",`端末${dRows.length}件・備品${sRows.length}件`);
+  XLSX.writeFile(wb,`手続き備品ログ_${today().replace(/-/g,"")}.xlsx`);
+  addLog("Excel出力","端末のダウンロード",`端末${dRows.length}件・備品${sRows.length}件`);
 };
 
 /* ===== 通信ログ ===== */
 const commLog=[];
 function addLog(type,dest,detail,ok=true){
-  const d=new Date();
-  commLog.unshift({ts:`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`,type,dest,detail,ok});
+  const d=new Date(), p=n=>String(n).padStart(2,"0");
+  commLog.unshift({ts:`${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,type,dest,detail,ok});
   if(commLog.length>100) commLog.length=100;
 }
-function renderLog(){
-  const el=$("#logList");
-  if(!commLog.length){ el.innerHTML='<div style="font-size:12px;color:var(--text-muted)">まだ操作ログはありません</div>'; return; }
-  el.innerHTML=commLog.map(c=>`
-    <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">
+$("#btnLog").onclick=()=>{
+  $("#logList").innerHTML = commLog.map(c=>`
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
       <span style="color:var(--text-muted);white-space:nowrap">${c.ts}</span>
-      <div>
-        <span style="font-weight:600;color:${c.ok?"var(--accent)":"var(--red-600)"}">${c.ok?"✓":"✗"} ${esc(c.type)}</span>
-        <span style="color:var(--text-muted)"> → ${esc(c.dest)}</span>
-        <div style="color:var(--text-muted);margin-top:1px">${esc(c.detail)}</div>
-      </div>
-    </div>`).join("");
-}
-$("#btnLog").onclick=()=>{ renderLog(); $("#logOverlay").classList.add("open"); };
-$("#logClose").onclick=()=>$("#logOverlay").classList.remove("open");
-$("#logOverlay").addEventListener("click",e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove("open"); });
+      <div><span style="color:${c.ok?"var(--accent)":"var(--danger)"}">${esc(c.type)}</span><span style="color:var(--text-muted)"> → ${esc(c.dest)}</span>
+      <div style="color:var(--text-muted)">${esc(c.detail)}</div></div>
+    </div>`).join("") || '<p class="note">まだ操作はありません</p>';
+  $("#logOverlay").classList.add("open");
+};
 
 /* ===== QR ===== */
-let qrDone=false;
-$("#btnQr").onclick=()=>{
-  if(!qrDone){ new QRCode($("#qrcode"),{text:location.href,width:160,height:160,correctLevel:QRCode.CorrectLevel.M}); $("#qrUrl").textContent=location.href; qrDone=true; }
-  $("#qrOverlay").classList.add("open");
+const QR_TARGETS = {
+  order: { q:"?scan=order", desc:"読み取るとすぐに注文書の撮影画面が開きます。", file:"QR_発注" },
+  deliv: { q:"?scan=deliv", desc:"読み取るとすぐに納品書の撮影画面が開きます。", file:"QR_納品" },
+  top:   { q:"",            desc:"一覧画面が開きます。", file:"QR_一覧" },
 };
-$("#qrClose").onclick=()=>$("#qrOverlay").classList.remove("open");
-$("#qrOverlay").addEventListener("click",e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove("open"); });
+let qrKind="order";
+function drawQr(){
+  const t=QR_TARGETS[qrKind], url=location.origin+location.pathname+t.q;
+  $("#qrcode").innerHTML="";
+  new QRCode($("#qrcode"),{text:url,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
+  $("#qrDesc").textContent=t.desc; $("#qrUrl").textContent=url;
+  $$("#qrSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.q===qrKind));
+}
+$$("#qrSeg button").forEach(b=>b.onclick=()=>{ qrKind=b.dataset.q; drawQr(); });
+$("#btnQr").onclick=()=>{ drawQr(); $("#qrOverlay").classList.add("open"); };
+$("#qrSave").onclick=()=>{
+  const c=$("#qrcode canvas"); if(!c) return;
+  const a=document.createElement("a"); a.href=c.toDataURL("image/png"); a.download=QR_TARGETS[qrKind].file+".png"; a.click();
+};
 
-/* ===== 初期化 ===== */
+/* オーバーレイを閉じる */
+[["#logOverlay","#logClose"],["#qrOverlay","#qrClose"]].forEach(([ov,cl])=>{
+  $(cl).onclick=()=>$(ov).classList.remove("open");
+  $(ov).addEventListener("click",e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove("open"); });
+});
+
+/* ===== 起動 ===== */
 if(typeof pdfjsLib!=="undefined") pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-lsLoad(); render();
-addLog("起動","ローカル","外部通信なし");
-try{ $("#dlg").close(); }catch(e){}
-setTimeout(()=>getWorker().catch(()=>{}),2000);
+lsLoad();
+const startScan = new URLSearchParams(location.search).get("scan");
+if(startScan==="order"||startScan==="deliv"){ mode="supply"; render(); openScan(startScan); }
+else { render(); setTimeout(()=>getWorker().catch(()=>{}), 2500); }
+addLog("起動","この端末","記録はこの端末内のみ・外部サーバーへの送信なし");
 </script>
 </body>
 </html>
