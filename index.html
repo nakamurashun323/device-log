@@ -5,166 +5,201 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>手続き・備品ログ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <style>
-:root{
-  --bg:#f2f4f1;--surface:#fff;--ink:#1a211e;--ink2:#3a4540;--muted:#6b7872;
-  --line:#dde2de;--faint:#f0f3f0;--hover:#eaf3ee;
-  --accent:#1a6b53;--accent2:#2d8f6f;--accent-soft:#e0eeea;--accent-ink:#fff;
-  --c-order:#1e5ba8;--c-order-bg:#e5edf8;
-  --c-change:#6b3fa8;--c-change-bg:#ede7f6;
-  --c-setup:#1a6b53;--c-setup-bg:#e0eeea;
-  --c-lend:#8a570a;--c-lend-bg:#f5ecda;
-  --c-return:#4a5750;--c-return-bg:#e8ece9;
-  --c-repair:#a84220;--c-repair-bg:#f6e6df;
-  --c-cancel:#a82030;--c-cancel-bg:#f6e0e3;
-  --c-supply:#3a7a3a;--c-supply-bg:#e3f0e3;
-  --c-warn:#a85f00;--c-warn-bg:#fdf0dc;
-  --r:12px;
-  --f:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
+:root {
+  --blue-900: #0f2744;
+  --blue-800: #1a3a5c;
+  --blue-700: #1e4976;
+  --blue-600: #2563a8;
+  --blue-500: #3b82f6;
+  --blue-400: #60a5fa;
+  --blue-100: #dbeafe;
+  --blue-50:  #eff6ff;
+  --gray-900: #111827;
+  --gray-700: #374151;
+  --gray-500: #6b7280;
+  --gray-300: #d1d5db;
+  --gray-200: #e5e7eb;
+  --gray-100: #f3f4f6;
+  --gray-50:  #f9fafb;
+  --white:    #ffffff;
+  --red-600:  #dc2626;
+  --red-50:   #fef2f2;
+  --green-600:#16a34a;
+  --green-50: #f0fdf4;
+  --amber-600:#d97706;
+  --amber-50: #fffbeb;
+
+  --surface: var(--white);
+  --bg: var(--gray-50);
+  --border: var(--gray-200);
+  --text: var(--gray-900);
+  --text-muted: var(--gray-500);
+  --accent: var(--blue-600);
+  --accent-hover: var(--blue-700);
+  --accent-light: var(--blue-50);
+  --r: 8px;
+  --f: "Inter","Noto Sans JP",system-ui,sans-serif;
 }
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#111714;--surface:#182018;--ink:#e5ece7;--ink2:#c0ccc3;--muted:#88978f;
-  --line:#263029;--faint:#1e2820;--hover:#1f3028;
-  --accent:#4db896;--accent-soft:#1a3530;--accent-ink:#0a1a14;
-  --c-order:#7aaae8;--c-order-bg:#1a2a40;--c-change:#b897e0;--c-change-bg:#271a3a;
-  --c-setup:#4db896;--c-setup-bg:#1a3530;--c-lend:#d8a855;--c-lend-bg:#302010;
-  --c-return:#9eaaa3;--c-return-bg:#232c27;--c-repair:#e0845a;--c-repair-bg:#301a10;
-  --c-cancel:#e0606e;--c-cancel-bg:#301015;--c-supply:#7ab87a;--c-supply-bg:#1a301a;
-  --c-warn:#e0a040;--c-warn-bg:#302010;
-  color-scheme:dark;
+  --surface: #1c2333;
+  --bg: #131929;
+  --border: #2d3a52;
+  --text: #e2e8f0;
+  --text-muted: #8899b4;
+  --accent: var(--blue-400);
+  --accent-hover: var(--blue-500);
+  --accent-light: #1e2d4a;
+  --gray-100: #232f45;
+  --gray-50: #1c2642;
+  --gray-200: #2a3a52;
+  --gray-300: #3a4d6a;
+  color-scheme: dark;
 }}
-*{box-sizing:border-box;margin:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.6}
-.wrap{max-width:860px;margin:0 auto;padding:20px 14px 100px}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--f); font-size: 14px; line-height: 1.6; min-height: 100dvh; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+/* レイアウト */
+.wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
 
 /* ヘッダー */
-.hdr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
-h1{font-size:19px;font-weight:700}
-.hbtns{display:flex;gap:7px;flex-wrap:wrap}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:7px 13px;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;white-space:nowrap;transition:border-color .15s;color:var(--ink)}
-.btn:hover{border-color:var(--muted)}
-.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-size:14px;padding:8px 18px}
-.btn.danger{color:var(--c-cancel);border-color:var(--c-cancel)}
-.btn.ghost{border-color:transparent;background:transparent}
+.hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.hdr-title { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+.hdr-actions { display: flex; gap: 8px; align-items: center; }
+
+/* ボタン */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--r); font-size: 13px; font-weight: 500; transition: background .12s, color .12s, border-color .12s; white-space: nowrap; }
+.btn-ghost { border: 1px solid var(--border); color: var(--text-muted); background: var(--surface); }
+.btn-ghost:hover { border-color: var(--gray-300); color: var(--text); background: var(--gray-100); }
+.btn-primary { background: var(--accent); color: var(--white); border: 1px solid transparent; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-danger { color: var(--red-600); border: 1px solid var(--border); background: var(--surface); }
+.btn-danger:hover { background: var(--red-50); border-color: var(--red-600); }
 
 /* タブ */
-.tabs{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface);margin-bottom:14px;width:fit-content}
-.tabs button{border:0;border-right:1px solid var(--line);background:transparent;padding:8px 18px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
-.tabs button:last-child{border-right:0}
-.tabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.cnt{font-size:11px;margin-left:3px;opacity:.7}
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 16px; gap: 0; }
+.tab-btn { padding: 10px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .12s, border-color .12s; }
+.tab-btn[aria-pressed="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn:hover:not([aria-pressed="true"]) { color: var(--text); }
+.tab-count { font-size: 11px; margin-left: 4px; padding: 1px 6px; border-radius: 10px; background: var(--gray-100); color: var(--text-muted); }
+.tab-btn[aria-pressed="true"] .tab-count { background: var(--accent-light); color: var(--accent); }
 
 /* リスト */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.empty{padding:48px 20px;text-align:center;color:var(--muted);font-size:13px}
-.row{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s;align-items:center}
-.row:last-child{border-bottom:0}
-.row:hover{background:var(--hover)}
-.badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;white-space:nowrap}
-.row-title{font-weight:600;font-size:13.5px}
-.row-sub{font-size:12px;color:var(--muted)}
-.row-meta{text-align:right;font-size:12px;color:var(--muted);white-space:nowrap;line-height:1.4}
+.list-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.empty-state { padding: 56px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
+.list-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+.list-row:last-child { border-bottom: none; }
+.list-row:hover { background: var(--gray-50); }
+.row-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.row-label { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.row-title { font-size: 13px; font-weight: 500; }
+.row-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.row-right { text-align: right; }
+.row-date { font-size: 12px; color: var(--text-muted); }
+.row-status { font-size: 11px; font-weight: 500; margin-top: 2px; }
 
-/* 納品照合バナー */
-.verify-banner{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:8px}
-.verify-ok{background:var(--c-setup-bg);color:var(--c-setup)}
-.verify-ng{background:var(--c-cancel-bg);color:var(--c-cancel)}
-.verify-warn{background:var(--c-warn-bg);color:var(--c-warn)}
+/* ラベル色 */
+.lbl-order  { background: var(--blue-50);  color: var(--blue-700); }
+.lbl-change { background: #f3f0ff; color: #5b21b6; }
+.lbl-setup  { background: var(--green-50); color: var(--green-600); }
+.lbl-lend   { background: var(--amber-50); color: var(--amber-600); }
+.lbl-return { background: var(--gray-100); color: var(--gray-700); }
+.lbl-repair { background: #fff7ed; color: #c2410c; }
+.lbl-cancel { background: var(--red-50);   color: var(--red-600); }
+.lbl-supply { background: var(--blue-50);  color: var(--blue-700); }
+.status-done   { color: var(--green-600); }
+.status-pend   { color: var(--text-muted); }
+.status-diff   { color: var(--red-600); }
 
 /* ダイアログ */
-dialog{border:0;border-radius:16px;padding:0;background:var(--surface);box-shadow:0 8px 40px rgb(0 0 0/.18);width:min(96vw,520px);max-height:92dvh;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
-dialog::backdrop{background:rgb(0 0 0/.45)}
-.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 0}
-.dlg-head h2{font-size:16px;font-weight:700}
-form{overflow-y:auto;padding:14px 20px 24px;display:grid;gap:11px}
-label.f{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--muted)}
-label.f input,label.f select,label.f textarea{
-  border:1px solid var(--line);border-radius:9px;padding:9px 11px;
-  background:var(--faint);color:var(--ink);font-size:15px;width:100%
+dialog { border: none; border-radius: 12px; padding: 0; background: var(--surface); box-shadow: 0 4px 32px rgb(0 0 0 / .16); width: min(96vw, 520px); max-height: 92dvh; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+dialog::backdrop { background: rgb(0 0 0 / .4); }
+.dlg-head { padding: 20px 20px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dlg-head h2 { font-size: 15px; font-weight: 600; }
+.dlg-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--text-muted); font-size: 16px; }
+.dlg-close:hover { background: var(--gray-100); color: var(--text); }
+.dlg-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin: 16px 20px 0; }
+.dlg-tab { padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.dlg-tab[aria-pressed="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 12px; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r);
+  background: var(--bg); color: var(--text); font-size: 14px; transition: border-color .12s;
 }
-label.f textarea{resize:vertical;min-height:56px;font-size:14px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); outline: none; }
+.field textarea { resize: vertical; min-height: 54px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* セグメント選択 */
-.seg-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg label{cursor:pointer}
-.seg label input[type=radio]{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
-.seg label span{
-  display:inline-block;padding:7px 14px;border:1.5px solid var(--line);
-  border-radius:8px;font-size:13px;font-weight:600;transition:all .12s;
-  background:var(--surface);white-space:nowrap;user-select:none
+/* チップ選択 */
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.chip span {
+  display: inline-block; padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px;
+  font-size: 12px; font-weight: 500; cursor: pointer; color: var(--text-muted);
+  background: var(--surface); transition: all .1s; white-space: nowrap; user-select: none;
 }
-.seg label:has(input:checked) span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip:has(input:checked) span { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.chip span:hover { border-color: var(--gray-300); color: var(--text); }
 
-/* アクション選択 */
-.act-seg{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
-.act-seg label span{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:10px 6px;border:1.5px solid var(--line);border-radius:10px;
-  font-size:12.5px;font-weight:700;text-align:center;min-height:52px;
-  background:var(--surface);transition:all .12s;white-space:nowrap;user-select:none
-}
-.act-seg label input{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
-.act-seg label[data-ac="発注"]:has(input:checked) span{background:var(--c-order-bg);color:var(--c-order);border-color:var(--c-order)}
-.act-seg label[data-ac="機種変更"]:has(input:checked) span{background:var(--c-change-bg);color:var(--c-change);border-color:var(--c-change)}
-.act-seg label[data-ac="初期設定"]:has(input:checked) span{background:var(--c-setup-bg);color:var(--c-setup);border-color:var(--c-setup)}
-.act-seg label[data-ac="貸与"]:has(input:checked) span{background:var(--c-lend-bg);color:var(--c-lend);border-color:var(--c-lend)}
-.act-seg label[data-ac="返却"]:has(input:checked) span{background:var(--c-return-bg);color:var(--c-return);border-color:var(--c-return)}
-.act-seg label[data-ac="修理"]:has(input:checked) span{background:var(--c-repair-bg);color:var(--c-repair);border-color:var(--c-repair)}
-.act-seg label[data-ac="解約"]:has(input:checked) span{background:var(--c-cancel-bg);color:var(--c-cancel);border-color:var(--c-cancel)}
-
-.factions{display:flex;gap:8px;justify-content:flex-end;padding-top:4px;flex-wrap:wrap}
-.factions .left{margin-right:auto}
-
-/* FAB */
-.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0));right:20px;
-  width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);
-  color:var(--accent-ink);font-size:28px;box-shadow:0 4px 16px rgb(0 0 0/.22);
-  display:flex;align-items:center;justify-content:center;z-index:100;transition:transform .15s}
-.fab:active{transform:scale(.92)}
-@media(min-width:700px){.fab{display:none}}
-
-/* QR */
-.qr-overlay{position:fixed;inset:0;background:rgb(0 0 0/.5);z-index:200;display:none;align-items:center;justify-content:center}
-.qr-overlay.open{display:flex}
-.qr-box{background:var(--surface);border-radius:16px;padding:28px 32px;text-align:center;display:grid;gap:12px;max-width:290px;width:90vw}
-.qr-box h3{font-size:15px;font-weight:700}
-.qr-url{font-size:10.5px;color:var(--muted);word-break:break-all}
+/* フォームアクション */
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; padding-top: 4px; }
+.form-actions .left { margin-right: auto; }
 
 /* OCRゾーン */
-.ocr-zone{background:var(--faint);border:1.5px dashed var(--line);border-radius:12px;padding:12px;display:grid;gap:8px}
-.ocr-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ocr-pick{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 8px;
-  border:1.5px solid var(--accent);border-radius:10px;cursor:pointer;
-  font-size:13px;font-weight:700;color:var(--accent);background:var(--accent-soft)}
-.ocr-pick:hover{background:var(--hover)}
-.ocr-preview{position:relative;display:none}
-.ocr-preview img{width:100%;max-height:160px;object-fit:contain;border-radius:8px;border:1px solid var(--line)}
-.ocr-clear{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:0;
-  background:rgb(0 0 0/.55);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.ocr-result{display:none;padding:8px 10px;background:var(--accent-soft);border-radius:8px;font-size:12px;border:1px solid var(--accent)}
-.ocr-dl-btn{width:100%;padding:10px;border:0;border-radius:8px;background:var(--c-order);color:#fff;
-  font-size:13px;font-weight:700;cursor:pointer;margin-top:6px}
+.ocr-zone { border: 1px solid var(--border); border-radius: var(--r); padding: 12px; background: var(--bg); display: grid; gap: 8px; }
+.ocr-zone-label { font-size: 12px; font-weight: 500; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+.ocr-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ocr-pick-label { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; border: 1px solid var(--accent); border-radius: var(--r); cursor: pointer; font-size: 12px; font-weight: 500; color: var(--accent); background: var(--accent-light); transition: background .1s; }
+.ocr-pick-label:hover { background: var(--blue-100); }
+.ocr-preview { display: none; position: relative; }
+.ocr-preview img { width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px; border: 1px solid var(--border); }
+.ocr-clear-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgb(0 0 0 / .5); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.ocr-result { display: none; padding: 8px 10px; border: 1px solid var(--blue-100); border-radius: var(--r); background: var(--accent-light); font-size: 12px; }
+.ocr-result-title { font-weight: 600; color: var(--accent); margin-bottom: 2px; }
+.ocr-result-text { color: var(--text-muted); line-height: 1.8; }
+.ocr-dl-btn { display: none; width: 100%; margin-top: 8px; padding: 9px; border-radius: var(--r); background: var(--accent); color: var(--white); font-size: 12px; font-weight: 500; cursor: pointer; border: none; }
 
-/* 納品照合セクション */
-.verify-section{background:var(--faint);border:1.5px solid var(--c-warn);border-radius:12px;padding:12px;display:grid;gap:8px}
-.verify-section h4{font-size:13px;font-weight:700;color:var(--c-warn)}
+/* 納品照合 */
+.verify-zone { border: 1px solid var(--amber-600); border-radius: var(--r); padding: 12px; background: var(--amber-50); display: grid; gap: 10px; }
+.verify-zone-title { font-size: 12px; font-weight: 600; color: var(--amber-600); }
+.verify-banner { padding: 8px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.verify-ok  { background: var(--green-50);  color: var(--green-600); }
+.verify-ng  { background: var(--red-50);    color: var(--red-600); }
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .verify-zone { background: #2a1f00; border-color: #d97706; } :root:not([data-theme="light"]) .verify-ok { background: #052e16; } :root:not([data-theme="light"]) .verify-ng { background: #450a0a; } :root:not([data-theme="light"]) .ocr-result { background: var(--accent-light); border-color: var(--blue-700); }}
+
+/* 通信ログモーダル */
+.modal-overlay { position: fixed; inset: 0; background: rgb(0 0 0 / .4); z-index: 300; display: none; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--surface); border-radius: 12px; width: min(96vw, 540px); max-height: 80dvh; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border); }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.modal-head h3 { font-size: 14px; font-weight: 600; }
+.modal-body { overflow-y: auto; padding: 12px 20px 20px; }
+
+/* QR */
+.qr-box { background: var(--surface); border-radius: 12px; padding: 28px 32px; text-align: center; display: grid; gap: 12px; max-width: 280px; width: 90vw; border: 1px solid var(--border); }
+.qr-url { font-size: 10px; color: var(--text-muted); word-break: break-all; }
+
+/* 新規ボタン（固定） */
+.new-btn-wrap { position: fixed; bottom: 24px; right: 20px; z-index: 100; }
+@media(min-width:600px) { .new-btn-wrap { display: none; } }
 
 @media(max-width:600px){
-  dialog{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0}
-  .dlg-head{padding:14px 16px 0}
-  form{padding:12px 16px 20px}
-  label.f input,label.f select{font-size:16px}
-  .factions{position:sticky;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px;margin:0 -16px;z-index:10}
+  dialog { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; border-radius: 0; margin: 0; }
+  .dlg-head { padding: 16px 16px 0; }
+  form { padding: 12px 16px 16px; }
+  .field input, .field select { font-size: 16px; }
+  .form-actions { position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px; margin: 0 -16px; }
 }
 </style>
 </head>
@@ -172,205 +207,214 @@ label.f textarea{resize:vertical;min-height:56px;font-size:14px}
 <div class="wrap">
 
   <header class="hdr">
-    <h1>📋 手続き・備品ログ</h1>
-    <div class="hbtns">
-      <button class="btn" id="btnLog" type="button">🔒 通信</button>
-      <button class="btn" id="btnQr" type="button">QR</button>
-      <button class="btn" id="btnExcel" type="button">📥 Excel</button>
-      <button class="btn primary" id="btnNew" type="button">＋ 記録する</button>
+    <span class="hdr-title">手続き・備品ログ</span>
+    <div class="hdr-actions">
+      <button class="btn btn-ghost" id="btnLog" type="button">通信ログ</button>
+      <button class="btn btn-ghost" id="btnQr" type="button">QR</button>
+      <button class="btn btn-ghost" id="btnExcel" type="button">Excel</button>
+      <button class="btn btn-primary" id="btnNew" type="button">+ 新規</button>
     </div>
   </header>
 
-  <!-- タブ -->
-  <div class="tabs" id="mainTabs">
-    <button type="button" data-m="device" aria-pressed="true">端末・ライセンス<span class="cnt" id="cntD">0</span></button>
-    <button type="button" data-m="supply" aria-pressed="false">備品・消耗品<span class="cnt" id="cntS">0</span></button>
+  <div class="tabs">
+    <button class="tab-btn" data-m="device" aria-pressed="true" type="button">
+      端末・ライセンス<span class="tab-count" id="cntD">0</span>
+    </button>
+    <button class="tab-btn" data-m="supply" aria-pressed="false" type="button">
+      備品・消耗品<span class="tab-count" id="cntS">0</span>
+    </button>
   </div>
 
-  <!-- リスト -->
-  <div class="card" id="list"></div>
+  <div class="list-card" id="list"></div>
 </div>
 
-<!-- FAB -->
-<button class="fab" id="fab" type="button">＋</button>
+<!-- 固定新規ボタン（SP） -->
+<div class="new-btn-wrap">
+  <button class="btn btn-primary" id="fabNew" type="button" style="padding:12px 20px;border-radius:24px;box-shadow:0 2px 12px rgb(0 0 0/.18)">+ 新規</button>
+</div>
+
+<!-- 通信ログ -->
+<div class="modal-overlay" id="logOverlay">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>通信ログ</h3>
+      <button class="dlg-close" id="logClose" type="button">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:12px;line-height:1.7">OCR処理はすべてブラウザ内で完結します。画像データは外部に送信されません。</p>
+      <div id="logList"></div>
+    </div>
+  </div>
+</div>
 
 <!-- QR -->
-<div class="qr-overlay" id="qrOverlay">
+<div class="modal-overlay" id="qrOverlay">
   <div class="qr-box">
-    <h3>このページのQRコード</h3>
+    <div style="font-size:14px;font-weight:600">このページのQR</div>
     <div id="qrcode"></div>
-    <p class="qr-url" id="qrUrl"></p>
-    <button class="btn" id="qrClose" type="button">閉じる</button>
+    <div class="qr-url" id="qrUrl"></div>
+    <button class="btn btn-ghost" id="qrClose" type="button">閉じる</button>
   </div>
 </div>
 
 <!-- フォームダイアログ -->
 <dialog id="dlg">
   <div class="dlg-head">
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <h2 id="dlgTitle">記録する</h2>
-      <div class="tabs" id="frmTabs" style="margin:0">
-        <button type="button" data-fm="device" aria-pressed="true">端末</button>
-        <button type="button" data-fm="supply" aria-pressed="false">備品</button>
-      </div>
-    </div>
-    <button class="btn ghost" type="button" id="btnDlgX" style="font-size:18px;padding:4px 8px">✕</button>
+    <h2 id="dlgTitle">新規記録</h2>
+    <button class="dlg-close" id="btnDlgX" type="button">✕</button>
+  </div>
+  <div class="dlg-tabs">
+    <button class="dlg-tab" data-fm="device" aria-pressed="true" type="button">端末</button>
+    <button class="dlg-tab" data-fm="supply" aria-pressed="false" type="button">備品</button>
   </div>
 
   <form id="frm" method="dialog">
 
-    <!-- ===== 端末セクション ===== -->
+    <!-- 端末 -->
     <div id="secDevice">
-      <div style="margin-bottom:11px">
-        <div class="seg-label">種別</div>
-        <div class="seg" id="segCat">
-          <label><input type="radio" name="cat" value="携帯"><span>📱 携帯</span></label>
-          <label><input type="radio" name="cat" value="ポケットWi-Fi"><span>📶 Wi-Fi</span></label>
-          <label><input type="radio" name="cat" value="PC"><span>💻 PC</span></label>
-          <label><input type="radio" name="cat" value="Microsoft 365"><span>🪟 M365</span></label>
+      <div class="field" style="margin-bottom:4px">
+        <label>種別</label>
+        <div class="chip-group">
+          <label class="chip"><input type="radio" name="cat" value="携帯"><span>携帯</span></label>
+          <label class="chip"><input type="radio" name="cat" value="ポケットWi-Fi"><span>Wi-Fi</span></label>
+          <label class="chip"><input type="radio" name="cat" value="PC"><span>PC</span></label>
+          <label class="chip"><input type="radio" name="cat" value="Microsoft 365"><span>M365</span></label>
         </div>
       </div>
-      <div style="margin-bottom:11px">
-        <div class="seg-label">手続き</div>
-        <div class="act-seg" id="segAct">
-          <label data-ac="発注"><input type="radio" name="act" value="発注"><span>📦<br>発注</span></label>
-          <label data-ac="機種変更"><input type="radio" name="act" value="機種変更"><span>🔄<br>機種変更</span></label>
-          <label data-ac="初期設定"><input type="radio" name="act" value="初期設定"><span>⚙️<br>初期設定</span></label>
-          <label data-ac="貸与"><input type="radio" name="act" value="貸与"><span>🤝<br>貸与</span></label>
-          <label data-ac="返却"><input type="radio" name="act" value="返却"><span>↩️<br>返却</span></label>
-          <label data-ac="修理"><input type="radio" name="act" value="修理"><span>🔧<br>修理</span></label>
-          <label data-ac="解約"><input type="radio" name="act" value="解約"><span>🚫<br>解約</span></label>
+      <div class="field" style="margin-bottom:4px">
+        <label>手続き</label>
+        <div class="chip-group">
+          <label class="chip"><input type="radio" name="act" value="発注"><span>発注</span></label>
+          <label class="chip"><input type="radio" name="act" value="機種変更"><span>機種変更</span></label>
+          <label class="chip"><input type="radio" name="act" value="初期設定"><span>初期設定</span></label>
+          <label class="chip"><input type="radio" name="act" value="貸与"><span>貸与</span></label>
+          <label class="chip"><input type="radio" name="act" value="返却"><span>返却</span></label>
+          <label class="chip"><input type="radio" name="act" value="修理"><span>修理</span></label>
+          <label class="chip"><input type="radio" name="act" value="解約"><span>解約</span></label>
         </div>
       </div>
-      <div style="margin-bottom:11px">
-        <div class="seg-label">部署</div>
-        <div class="seg" id="segDept"></div>
+      <div class="field" style="margin-bottom:4px">
+        <label>部署</label>
+        <div class="chip-group" id="segDept"></div>
       </div>
       <div class="grid2">
-        <label class="f">氏名<input id="iName" placeholder="山田 太郎" autocomplete="off" inputmode="text"></label>
-        <label class="f">端末番号<input id="iNo" placeholder="090-XXXX-XXXX" autocomplete="off" inputmode="tel"></label>
+        <div class="field"><label>氏名</label><input id="iName" placeholder="山田 太郎" autocomplete="off"></div>
+        <div class="field"><label>端末番号</label><input id="iNo" placeholder="090-XXXX-XXXX" inputmode="tel" autocomplete="off"></div>
       </div>
-      <label class="f">機種名<input id="iModel" placeholder="iPhone 16 Pro など" autocomplete="off"></label>
+      <div class="field"><label>機種名</label><input id="iModel" placeholder="iPhone 16 Pro など" autocomplete="off"></div>
       <div class="grid2">
-        <label class="f">日付<input type="date" id="iDate"></label>
-        <div>
-          <div class="seg-label">状態</div>
-          <div class="seg">
-            <label><input type="radio" name="status" value="手配中"><span>手配中</span></label>
-            <label><input type="radio" name="status" value="完了"><span>✓ 完了</span></label>
+        <div class="field"><label>日付</label><input type="date" id="iDate"></div>
+        <div class="field">
+          <label>状態</label>
+          <div class="chip-group">
+            <label class="chip"><input type="radio" name="status" value="手配中"><span>手配中</span></label>
+            <label class="chip"><input type="radio" name="status" value="完了"><span>完了</span></label>
           </div>
         </div>
       </div>
-      <label class="f">メモ（任意）<textarea id="iMemo" rows="2" placeholder="備考など"></textarea></label>
+      <div class="field"><label>メモ</label><textarea id="iMemo" rows="2" placeholder="備考など"></textarea></div>
     </div>
 
-    <!-- ===== 備品セクション ===== -->
+    <!-- 備品 -->
     <div id="secSupply" hidden>
 
-      <!-- ① 注文書 OCRゾーン -->
-      <div class="ocr-zone" id="ocrOrderZone">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <span style="font-size:12px;font-weight:700;color:var(--muted)">📄 注文書・請求書を読み取る</span>
-          <span id="ocrOrderStatus" style="font-size:11px;color:var(--accent)"></span>
+      <!-- 注文書OCR -->
+      <div class="ocr-zone">
+        <div class="ocr-zone-label">
+          <span>注文書・請求書を読み取る</span>
+          <span id="ocrOrderStatus" style="color:var(--accent);font-size:11px"></span>
         </div>
         <div class="ocr-btns">
-          <label class="ocr-pick">
-            📷 カメラ撮影
+          <label class="ocr-pick-label">
+            カメラ撮影
             <input type="file" id="ocrOrderCamera" accept="image/*" capture="environment" style="display:none">
           </label>
-          <label class="ocr-pick">
-            📁 PDF / 画像
+          <label class="ocr-pick-label">
+            PDF / 画像
             <input type="file" id="ocrOrderFile" accept="image/*,application/pdf" style="display:none">
           </label>
         </div>
         <div class="ocr-preview" id="ocrOrderPreview">
-          <img id="ocrOrderImg" alt="注文書プレビュー">
-          <button type="button" class="ocr-clear" data-zone="order">✕</button>
+          <img id="ocrOrderImg" alt="">
+          <button type="button" class="ocr-clear-btn" data-zone="order">✕</button>
         </div>
         <div class="ocr-result" id="ocrOrderResult">
-          <div style="font-weight:700;color:var(--accent);margin-bottom:3px">✓ 読み取り完了 — フォームに自動入力しました</div>
-          <div id="ocrOrderResultText" style="color:var(--ink2);line-height:1.8"></div>
-          <button type="button" class="ocr-dl-btn" id="btnDlOrder" style="display:none"></button>
+          <div class="ocr-result-title">読み取り完了 — フォームに自動入力しました</div>
+          <div class="ocr-result-text" id="ocrOrderResultText"></div>
+          <button type="button" class="ocr-dl-btn" id="btnDlOrder"></button>
         </div>
       </div>
 
-      <!-- 購入先 -->
-      <div>
-        <div class="seg-label">購入先</div>
-        <div class="seg" id="segSupplier">
-          <label><input type="radio" name="supplier" value="ASKUL"><span>ASKUL</span></label>
-          <label><input type="radio" name="supplier" value="Amazon"><span>Amazon</span></label>
-          <label><input type="radio" name="supplier" value="フォレストウェイ"><span>フォレストウェイ</span></label>
-          <label><input type="radio" name="supplier" value="その他"><span>その他</span></label>
+      <div class="field">
+        <label>購入先</label>
+        <div class="chip-group" id="segSupplier">
+          <label class="chip"><input type="radio" name="supplier" value="ASKUL"><span>ASKUL</span></label>
+          <label class="chip"><input type="radio" name="supplier" value="Amazon"><span>Amazon</span></label>
+          <label class="chip"><input type="radio" name="supplier" value="フォレストウェイ"><span>フォレストウェイ</span></label>
+          <label class="chip"><input type="radio" name="supplier" value="その他"><span>その他</span></label>
         </div>
       </div>
 
-      <!-- 部署 -->
-      <div>
-        <div class="seg-label">部署</div>
-        <div class="seg" id="segDeptS"></div>
+      <div class="field">
+        <label>部署</label>
+        <div class="chip-group" id="segDeptS"></div>
       </div>
 
-      <label class="f">品名<input id="iSName" placeholder="A4コピー用紙 など" autocomplete="off"></label>
+      <div class="field"><label>品名</label><input id="iSName" placeholder="A4コピー用紙 など" autocomplete="off"></div>
 
       <div class="grid2">
-        <label class="f">注文数量<input id="iQty" type="number" min="1" placeholder="1" inputmode="numeric"></label>
-        <label class="f">注文金額（円）<input id="iAmt" type="number" min="0" placeholder="0" inputmode="numeric"></label>
+        <div class="field"><label>注文数量</label><input id="iQty" type="number" min="1" placeholder="1" inputmode="numeric"></div>
+        <div class="field"><label>注文金額（円）</label><input id="iAmt" type="number" min="0" placeholder="0" inputmode="numeric"></div>
       </div>
-
       <div class="grid2">
-        <label class="f">注文日<input type="date" id="iSDate"></label>
-        <label class="f">注文番号<input id="iOrderNo" placeholder="注文番号" autocomplete="off"></label>
+        <div class="field"><label>注文日</label><input type="date" id="iSDate"></div>
+        <div class="field"><label>注文番号</label><input id="iOrderNo" placeholder="注文番号" autocomplete="off"></div>
       </div>
+      <div class="field"><label>メモ</label><textarea id="iSMemo" rows="2" placeholder="管理番号・用途など"></textarea></div>
 
-      <label class="f">メモ（任意）<textarea id="iSMemo" rows="2" placeholder="管理番号・用途など"></textarea></label>
-
-      <!-- ② 納品照合ゾーン（編集時のみ表示） -->
-      <div class="verify-section" id="verifySection" style="display:none">
-        <h4>📦 納品書を照合する</h4>
-        <!-- 照合結果 -->
-        <div id="verifyResult" style="display:none"></div>
-        <div class="ocr-zone" style="border:none;padding:0;background:transparent">
-          <div class="ocr-btns">
-            <label class="ocr-pick" style="border-color:var(--c-warn);color:var(--c-warn);background:var(--c-warn-bg)">
-              📷 納品書を撮影
-              <input type="file" id="ocrDelivCamera" accept="image/*" capture="environment" style="display:none">
-            </label>
-            <label class="ocr-pick" style="border-color:var(--c-warn);color:var(--c-warn);background:var(--c-warn-bg)">
-              📁 PDF / 画像
-              <input type="file" id="ocrDelivFile" accept="image/*,application/pdf" style="display:none">
-            </label>
-          </div>
-          <div class="ocr-preview" id="ocrDelivPreview">
-            <img id="ocrDelivImg" alt="納品書プレビュー">
-            <button type="button" class="ocr-clear" data-zone="deliv">✕</button>
-          </div>
-          <div class="ocr-result" id="ocrDelivResult">
-            <div id="ocrDelivResultText" style="line-height:1.8"></div>
-            <button type="button" class="ocr-dl-btn" id="btnDlDeliv" style="display:none;background:var(--c-warn)"></button>
-          </div>
+      <!-- 納品照合（編集時のみ） -->
+      <div class="verify-zone" id="verifySection" style="display:none">
+        <div class="verify-zone-title">納品書を照合する</div>
+        <div id="verifyResult"></div>
+        <div class="ocr-btns">
+          <label class="ocr-pick-label" style="border-color:var(--amber-600);color:var(--amber-600);background:var(--amber-50)">
+            納品書を撮影
+            <input type="file" id="ocrDelivCamera" accept="image/*" capture="environment" style="display:none">
+          </label>
+          <label class="ocr-pick-label" style="border-color:var(--amber-600);color:var(--amber-600);background:var(--amber-50)">
+            PDF / 画像
+            <input type="file" id="ocrDelivFile" accept="image/*,application/pdf" style="display:none">
+          </label>
         </div>
-        <div class="grid2" style="margin-top:4px">
-          <label class="f">納品数量<input id="iDelivQty" type="number" min="0" placeholder="0" inputmode="numeric"></label>
-          <label class="f">納品金額（円）<input id="iDelivAmt" type="number" min="0" placeholder="0" inputmode="numeric"></label>
+        <div class="ocr-preview" id="ocrDelivPreview">
+          <img id="ocrDelivImg" alt="">
+          <button type="button" class="ocr-clear-btn" data-zone="deliv">✕</button>
         </div>
-        <label class="f">到着日<input type="date" id="iDelivDate"></label>
-        <div>
-          <div class="seg-label">状態</div>
-          <div class="seg">
-            <label><input type="radio" name="supplyStatus" value="発注済"><span>発注済</span></label>
-            <label><input type="radio" name="supplyStatus" value="受取済"><span>✓ 受取済</span></label>
-            <label><input type="radio" name="supplyStatus" value="差異あり"><span>⚠️ 差異あり</span></label>
+        <div class="ocr-result" id="ocrDelivResult" style="background:var(--amber-50);border-color:var(--amber-600)">
+          <div class="ocr-result-text" id="ocrDelivResultText"></div>
+          <button type="button" class="ocr-dl-btn" id="btnDlDeliv" style="background:var(--amber-600)"></button>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>納品数量</label><input id="iDelivQty" type="number" min="0" inputmode="numeric"></div>
+          <div class="field"><label>納品金額（円）</label><input id="iDelivAmt" type="number" min="0" inputmode="numeric"></div>
+        </div>
+        <div class="field"><label>到着日</label><input type="date" id="iDelivDate"></div>
+        <div class="field">
+          <label>状態</label>
+          <div class="chip-group">
+            <label class="chip"><input type="radio" name="supplyStatus" value="発注済"><span>発注済</span></label>
+            <label class="chip"><input type="radio" name="supplyStatus" value="受取済"><span>受取済</span></label>
+            <label class="chip"><input type="radio" name="supplyStatus" value="差異あり"><span>差異あり</span></label>
           </div>
         </div>
       </div>
 
     </div>
 
-    <div class="factions">
-      <button class="btn danger left" type="button" id="btnDel" hidden>削除</button>
-      <button class="btn ghost" type="button" id="btnCancel">キャンセル</button>
-      <button class="btn primary" type="submit" id="btnSave">保存する</button>
+    <div class="form-actions">
+      <button class="btn btn-danger left" type="button" id="btnDel" hidden>削除</button>
+      <button class="btn btn-ghost" type="button" id="btnCancel">キャンセル</button>
+      <button class="btn btn-primary" type="submit" id="btnSave">保存</button>
     </div>
   </form>
 </dialog>
@@ -378,134 +422,109 @@ label.f textarea{resize:vertical;min-height:56px;font-size:14px}
 <script>
 /* ===== 定数 ===== */
 const LS_LOGS = "devlog.logs";
-const DEPTS_DEFAULT = ["本社","MB","KB","FB","BS","SB","CP","OS","HB","KM","EB","SE","YB","KE","DM","推進室"];
-
-/* 電帳法 仕入先コードマップ */
+const DEPTS = ["本社","MB","KB","FB","BS","SB","CP","OS","HB","KM","EB","SE","YB","KE","DM","推進室"];
 const SUPPLIER_MAP = [
-  { code:"ASKL", label:"ASKUL",       keys:["askul","アスクル"] },
-  { code:"AMZN", label:"Amazon",      keys:["amazon","アマゾン"] },
+  { code:"ASKL", label:"ASKUL",        keys:["askul","アスクル"] },
+  { code:"AMZN", label:"Amazon",       keys:["amazon","アマゾン"] },
   { code:"FRST", label:"フォレストウェイ", keys:["フォレストウェイ","forestway"] },
 ];
+const LABEL_CLASS = {発注:"lbl-order",機種変更:"lbl-change",初期設定:"lbl-setup",貸与:"lbl-lend",返却:"lbl-return",修理:"lbl-repair",解約:"lbl-cancel",購入:"lbl-supply"};
+
+/* ===== ユーティリティ ===== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const today = () => new Date().toISOString().slice(0,10);
+const newId = () => "L" + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const fmtDate = d => d ? d.slice(5).replace('-','/') : "";
+
 function supplierToCode(name){
   if(!name) return "OTHER";
   const n = name.toLowerCase();
-  for(const s of SUPPLIER_MAP){ if(s.keys.some(k=>n.includes(k))) return s.code; }
+  for(const s of SUPPLIER_MAP) if(s.keys.some(k=>n.includes(k))) return s.code;
   return "OTHER";
 }
 function supplierFromText(text){
-  for(const s of SUPPLIER_MAP){ if(s.keys.some(k=>text.toLowerCase().includes(k))) return s.label; }
+  for(const s of SUPPLIER_MAP) if(s.keys.some(k=>text.toLowerCase().includes(k))) return s.label;
   return null;
 }
 
-const $ = s=>document.querySelector(s);
-const esc = s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const today = ()=>new Date().toISOString().slice(0,10);
-const newId = ()=>"L"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const fmtDate = d=>d?d.slice(5).replace('-','/'):"";
-
 /* ===== 状態 ===== */
-let logs  = [];
-let depts = [...DEPTS_DEFAULT];
-let mode  = "device";
-let fMode = "device";
-let editId = null;
+let logs = [], mode = "device", fMode = "device", editId = null;
 
-/* ===== localStorage ===== */
-function lsLoad(){
-  try{
-    const l = localStorage.getItem(LS_LOGS);
-    if(l) logs = JSON.parse(l)||[];
-  }catch(e){}
-}
-function lsSave(){
-  try{ localStorage.setItem(LS_LOGS, JSON.stringify(logs)); }catch(e){}
-}
+function lsLoad(){ try{ const l=localStorage.getItem(LS_LOGS); if(l) logs=JSON.parse(l)||[]; }catch(e){} }
+function lsSave(){ try{ localStorage.setItem(LS_LOGS, JSON.stringify(logs)); }catch(e){} }
 
-/* ===== ログ操作（ローカルのみ・外部送信なし） ===== */
 function saveLog(id, data){
   const row = {id,...data};
   const idx = logs.findIndex(l=>l.id===id);
   if(idx>=0) logs[idx]=row; else logs.unshift(row);
   lsSave(); render();
-  addCommLog("保存", "localStorage", `ID:${id} をローカルに保存`);
+  addLog("保存", "localStorage", `ID:${id}`);
 }
 function removeLog(id){
   logs = logs.filter(l=>l.id!==id);
   lsSave(); render();
-  addCommLog("削除", "localStorage", `ID:${id} をローカルから削除`);
-}
-
-/* ===== バッジ色 ===== */
-const ACOL = {発注:"order",機種変更:"change",初期設定:"setup",貸与:"lend",返却:"return",修理:"repair",解約:"cancel",購入:"supply"};
-function badgeStyle(ac){
-  const k = ACOL[ac]||"return";
-  return `background:var(--c-${k}-bg);color:var(--c-${k});border:1px solid var(--c-${k})`;
+  addLog("削除", "localStorage", `ID:${id}`);
 }
 
 /* ===== 描画 ===== */
-function buildDeptSegs(){
+function buildChips(){
   ["segDept","segDeptS"].forEach((id,i)=>{
-    const el=$("#"+id); if(!el) return;
-    const name=i===0?"dept":"deptS";
-    el.innerHTML=depts.map(d=>`<label><input type="radio" name="${name}" value="${esc(d)}"><span>${esc(d)}</span></label>`).join("");
+    const el = $("#"+id); if(!el) return;
+    const name = i===0?"dept":"deptS";
+    el.innerHTML = DEPTS.map(d=>`<label class="chip"><input type="radio" name="${name}" value="${esc(d)}"><span>${esc(d)}</span></label>`).join("");
   });
 }
 
-function statusChip(status){
-  if(!status) return "";
-  const col = status==="受取済"||status==="完了" ? "var(--c-setup)" :
-              status==="差異あり" ? "var(--c-cancel)" : "var(--muted)";
-  return `<span style="font-size:10px;color:${col};font-weight:700">${esc(status)}</span>`;
-}
+function statusClass(s){ return s==="完了"||s==="受取済"?"status-done":s==="差異あり"?"status-diff":"status-pend"; }
 
 function render(){
   const dLogs = logs.filter(l=>l.logType!=="supply");
   const sLogs = logs.filter(l=>l.logType==="supply");
   $("#cntD").textContent = dLogs.length;
   $("#cntS").textContent = sLogs.length;
-  document.querySelectorAll("#mainTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===mode));
-
+  document.querySelectorAll(".tab-btn").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===mode));
   const cur = mode==="supply" ? sLogs : dLogs;
   if(!cur.length){
-    $("#list").innerHTML='<div class="empty">まだ記録がありません<br><span style="font-size:12px">「＋ 記録する」から登録してください</span></div>';
+    $("#list").innerHTML = '<div class="empty-state">まだ記録がありません</div>';
     return;
   }
-
   $("#list").innerHTML = cur.map(l=>{
+    const lc = LABEL_CLASS[l.action||"購入"]||"lbl-supply";
+    const label = l.logType==="supply" ? "購入" : (l.action||"—");
     if(l.logType==="supply"){
-      const title = l.sName||l.supplier||"—";
-      const qty   = l.quantity ? `注文${l.quantity}個` : "";
-      const amt   = l.amount   ? `¥${Number(l.amount).toLocaleString()}` : "";
-      const dqty  = l.delivQty ? `納品${l.delivQty}個` : "";
-      const sub   = [l.supplier, qty, amt, dqty].filter(Boolean).join(" · ");
-      // 差異検出
-      let diffBadge = "";
-      if(l.delivQty!=null && l.quantity!=null && Number(l.delivQty)!==Number(l.quantity))
-        diffBadge = `<span style="font-size:10px;font-weight:700;color:var(--c-cancel)"> ⚠️差異</span>`;
-      if(l.delivAmt!=null && l.amount!=null && Number(l.delivAmt)!==Number(l.amount))
-        diffBadge = `<span style="font-size:10px;font-weight:700;color:var(--c-cancel)"> ⚠️差異</span>`;
-      return `<div class="row" data-id="${esc(l.id)}">
-        <span class="badge" style="${badgeStyle("購入")}">購入</span>
-        <div style="min-width:0">
-          <div class="row-title">${esc(title)}${diffBadge}</div>
-          ${sub?`<div class="row-sub">${esc(sub)}</div>`:""}
+      const title = l.sName || l.supplier || "—";
+      const parts = [l.supplier, l.quantity?`${l.quantity}個`:null, l.amount?`¥${Number(l.amount).toLocaleString()}`:null].filter(Boolean);
+      const hasDiff = (l.delivQty!=null&&l.quantity!=null&&Number(l.delivQty)!==Number(l.quantity)) ||
+                      (l.delivAmt!=null&&l.amount!=null&&Number(l.delivAmt)!==Number(l.amount));
+      return `<div class="list-row" data-id="${esc(l.id)}">
+        <div>
+          <div class="row-top">
+            <span class="row-label ${lc}">${esc(label)}</span>
+            <span class="row-title">${esc(title)}${hasDiff?` <span style="color:var(--red-600);font-size:11px">差異あり</span>`:""}  </span>
+          </div>
+          ${parts.length?`<div class="row-sub">${esc(parts.join(" · "))}</div>`:""}
         </div>
-        <div class="row-meta">${fmtDate(l.date)}<br>${statusChip(l.status)}</div>
+        <div class="row-right">
+          <div class="row-date">${fmtDate(l.date)}</div>
+          <div class="row-status ${statusClass(l.status)}">${esc(l.status||"")}</div>
+        </div>
       </div>`;
     } else {
-      const name = l.name||"（氏名未入力）";
-      const dept = l.dept||"";
-      const sub  = [l.category, l.model, l.number].filter(Boolean).join(" · ");
-      return `<div class="row" data-id="${esc(l.id)}">
-        <span class="badge" style="${badgeStyle(l.action||"")}">${esc(l.action||"—")}</span>
-        <div style="min-width:0">
-          <div class="row-title" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <span>${esc(name)}</span>
-            ${dept?`<span style="font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--accent-soft);color:var(--accent)">${esc(dept)}</span>`:""}
+      const sub = [l.category, l.model, l.number].filter(Boolean).join(" · ");
+      return `<div class="list-row" data-id="${esc(l.id)}">
+        <div>
+          <div class="row-top">
+            <span class="row-label ${lc}">${esc(label)}</span>
+            <span class="row-title">${esc(l.name||"（氏名未入力）")}</span>
+            ${l.dept?`<span style="font-size:11px;color:var(--text-muted)">${esc(l.dept)}</span>`:""}
           </div>
           ${sub?`<div class="row-sub">${esc(sub)}</div>`:""}
         </div>
-        <div class="row-meta">${fmtDate(l.date)}<br>${statusChip(l.status)}</div>
+        <div class="row-right">
+          <div class="row-date">${fmtDate(l.date)}</div>
+          <div class="row-status ${statusClass(l.status)}">${esc(l.status||"")}</div>
+        </div>
       </div>`;
     }
   }).join("");
@@ -516,169 +535,124 @@ function setFMode(m){
   fMode=m;
   $("#secDevice").hidden=m!=="device";
   $("#secSupply").hidden=m!=="supply";
-  document.querySelectorAll("#frmTabs button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.fm===m));
+  document.querySelectorAll(".dlg-tab").forEach(b=>b.setAttribute("aria-pressed",b.dataset.fm===m));
 }
 
 function openForm(pre={}){
   editId = pre.id||null;
   const m = pre.logType==="supply"?"supply":"device";
-  setFMode(m);
-  buildDeptSegs();
-  $("#dlgTitle").textContent = editId?"記録を編集":"記録する";
+  setFMode(m); buildChips();
+  $("#dlgTitle").textContent = editId?"記録を編集":"新規記録";
   $("#btnDel").hidden = !editId;
-
-  // OCRゾーンリセット
-  resetOcrZone("order");
-  resetOcrZone("deliv");
-
+  resetOcr("order"); resetOcr("deliv");
   if(m==="device"){
     document.querySelectorAll('input[name=cat]').forEach(r=>r.checked=r.value===(pre.category||""));
     document.querySelectorAll('input[name=act]').forEach(r=>r.checked=r.value===(pre.action||""));
     document.querySelectorAll('input[name=dept]').forEach(r=>r.checked=r.value===(pre.dept||""));
     document.querySelectorAll('input[name=status]').forEach(r=>r.checked=r.value===(pre.status||"完了"));
-    $("#iName").value  = pre.name||"";
-    $("#iNo").value    = pre.number||"";
-    $("#iModel").value = pre.model||"";
-    $("#iDate").value  = pre.date||today();
-    $("#iMemo").value  = pre.memo||"";
+    $("#iName").value=pre.name||""; $("#iNo").value=pre.number||""; $("#iModel").value=pre.model||"";
+    $("#iDate").value=pre.date||today(); $("#iMemo").value=pre.memo||"";
   } else {
     document.querySelectorAll('input[name=supplier]').forEach(r=>r.checked=r.value===(pre.supplier||""));
     document.querySelectorAll('input[name=deptS]').forEach(r=>r.checked=r.value===(pre.dept||""));
     document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value===(pre.status||"発注済"));
-    $("#iSName").value  = pre.sName||"";
-    $("#iQty").value    = pre.quantity||"";
-    $("#iAmt").value    = pre.amount||"";
-    $("#iSDate").value  = pre.date||today();
-    $("#iOrderNo").value = pre.orderNo||"";
-    $("#iSMemo").value  = pre.sMemo||"";
-    // 納品照合ゾーン（編集時のみ表示）
-    const vs = $("#verifySection");
-    vs.style.display = editId ? "" : "none";
+    $("#iSName").value=pre.sName||""; $("#iQty").value=pre.quantity||""; $("#iAmt").value=pre.amount||"";
+    $("#iSDate").value=pre.date||today(); $("#iOrderNo").value=pre.orderNo||""; $("#iSMemo").value=pre.sMemo||"";
+    $("#verifySection").style.display=editId?"":"none";
     if(editId){
-      $("#iDelivQty").value  = pre.delivQty||"";
-      $("#iDelivAmt").value  = pre.delivAmt||"";
-      $("#iDelivDate").value = pre.deliveryDate||"";
-      // 既存の差異表示
-      showVerifyResult(pre);
+      $("#iDelivQty").value=pre.delivQty||""; $("#iDelivAmt").value=pre.delivAmt||""; $("#iDelivDate").value=pre.deliveryDate||"";
+      renderVerifyResult(pre);
     }
   }
   $("#dlg").showModal();
 }
 
-function showVerifyResult(log){
-  const r = $("#verifyResult");
-  if(!log.delivQty && !log.delivAmt){ r.style.display="none"; return; }
-  const qtyOk = log.quantity==null || log.delivQty==null || Number(log.quantity)===Number(log.delivQty);
-  const amtOk = log.amount==null   || log.delivAmt==null || Number(log.amount)===Number(log.delivAmt);
-  if(qtyOk && amtOk){
-    r.className="verify-banner verify-ok";
-    r.textContent="✓ 注文数量・金額が一致しています";
-  } else {
-    const msgs = [];
-    if(!qtyOk) msgs.push(`数量: 注文${log.quantity}個 → 納品${log.delivQty}個`);
-    if(!amtOk) msgs.push(`金額: 注文¥${Number(log.amount).toLocaleString()} → 納品¥${Number(log.delivAmt).toLocaleString()}`);
-    r.className="verify-banner verify-ng";
-    r.innerHTML=`⚠️ 差異があります — ${msgs.join(" / ")}`;
+function renderVerifyResult(log){
+  const r=$("#verifyResult");
+  if(!log.delivQty&&!log.delivAmt){ r.innerHTML=""; return; }
+  const qOk=log.quantity==null||log.delivQty==null||Number(log.quantity)===Number(log.delivQty);
+  const aOk=log.amount==null||log.delivAmt==null||Number(log.amount)===Number(log.delivAmt);
+  if(qOk&&aOk) r.innerHTML=`<div class="verify-banner verify-ok">注文と一致しています</div>`;
+  else {
+    const ms=[];
+    if(!qOk) ms.push(`数量: 注文${log.quantity} → 納品${log.delivQty}`);
+    if(!aOk) ms.push(`金額: 注文¥${Number(log.amount).toLocaleString()} → 納品¥${Number(log.delivAmt).toLocaleString()}`);
+    r.innerHTML=`<div class="verify-banner verify-ng">差異 — ${ms.join(" / ")}</div>`;
   }
-  r.style.display="flex";
 }
 
-/* ===== 送信 ===== */
+/* 送信 */
 $("#frm").addEventListener("submit", e=>{
   e.preventDefault();
-  const btn=$("#btnSave"); btn.disabled=true; btn.textContent="保存中…";
+  const btn=$("#btnSave"); btn.disabled=true;
   try{
     if(fMode==="supply"){
-      const dqty = $("#iDelivQty").value ? Number($("#iDelivQty").value) : null;
-      const damt = $("#iDelivAmt").value ? Number($("#iDelivAmt").value) : null;
+      const dqty=$("#iDelivQty").value?Number($("#iDelivQty").value):null;
+      const damt=$("#iDelivAmt").value?Number($("#iDelivAmt").value):null;
       saveLog(editId||newId(),{
         logType:"supply",
-        supplier: document.querySelector('input[name=supplier]:checked')?.value||"",
-        dept:     document.querySelector('input[name=deptS]:checked')?.value||"",
-        sName:    $("#iSName").value.trim(),
-        quantity: $("#iQty").value ? Number($("#iQty").value) : null,
-        amount:   $("#iAmt").value ? Number($("#iAmt").value) : null,
-        date:     $("#iSDate").value||today(),
-        orderNo:  $("#iOrderNo").value.trim()||null,
-        sMemo:    $("#iSMemo").value.trim(),
-        delivQty: dqty,
-        delivAmt: damt,
-        deliveryDate: $("#iDelivDate").value||null,
-        status:   document.querySelector('input[name=supplyStatus]:checked')?.value||"発注済",
-        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(),
-        updatedAt:Date.now()
+        supplier:document.querySelector('input[name=supplier]:checked')?.value||"",
+        dept:document.querySelector('input[name=deptS]:checked')?.value||"",
+        sName:$("#iSName").value.trim(), quantity:$("#iQty").value?Number($("#iQty").value):null,
+        amount:$("#iAmt").value?Number($("#iAmt").value):null, date:$("#iSDate").value||today(),
+        orderNo:$("#iOrderNo").value.trim()||null, sMemo:$("#iSMemo").value.trim(),
+        delivQty:dqty, delivAmt:damt, deliveryDate:$("#iDelivDate").value||null,
+        status:document.querySelector('input[name=supplyStatus]:checked')?.value||"発注済",
+        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(), updatedAt:Date.now()
       });
     } else {
       saveLog(editId||newId(),{
         logType:"device",
         category:document.querySelector('input[name=cat]:checked')?.value||"",
-        action:  document.querySelector('input[name=act]:checked')?.value||"",
-        dept:    document.querySelector('input[name=dept]:checked')?.value||"",
-        name:    $("#iName").value.trim(),
-        number:  $("#iNo").value.trim(),
-        model:   $("#iModel").value.trim(),
-        date:    $("#iDate").value||today(),
-        status:  document.querySelector('input[name=status]:checked')?.value||"完了",
-        memo:    $("#iMemo").value.trim(),
-        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(),
-        updatedAt:Date.now()
+        action:document.querySelector('input[name=act]:checked')?.value||"",
+        dept:document.querySelector('input[name=dept]:checked')?.value||"",
+        name:$("#iName").value.trim(), number:$("#iNo").value.trim(), model:$("#iModel").value.trim(),
+        date:$("#iDate").value||today(), status:document.querySelector('input[name=status]:checked')?.value||"完了",
+        memo:$("#iMemo").value.trim(),
+        createdAt:(editId?logs.find(l=>l.id===editId)?.createdAt:null)||Date.now(), updatedAt:Date.now()
       });
     }
     $("#dlg").close();
-  }finally{ btn.disabled=false; btn.textContent="保存する"; }
+  }finally{ btn.disabled=false; }
 });
 
-/* ===== 編集・削除 ===== */
+/* リスト操作 */
 $("#list").addEventListener("click", e=>{
-  const row=e.target.closest(".row"); if(!row) return;
+  const row=e.target.closest(".list-row"); if(!row) return;
   const l=logs.find(x=>x.id===row.dataset.id); if(!l) return;
   openForm(l);
 });
-$("#btnDel").onclick=()=>{
-  if(!editId||!confirm("この記録を削除しますか？")) return;
-  removeLog(editId);
-  $("#dlg").close();
-};
+$("#btnDel").onclick=()=>{ if(!editId||!confirm("この記録を削除しますか？")) return; removeLog(editId); $("#dlg").close(); };
 
-/* ===== ダイアログ制御 ===== */
-$("#btnNew").onclick  = ()=>openForm({logType:mode==="supply"?"supply":"device"});
-$("#fab").onclick     = ()=>openForm({logType:mode==="supply"?"supply":"device"});
-$("#btnDlgX").onclick = ()=>$("#dlg").close();
-$("#btnCancel").onclick = ()=>$("#dlg").close();
-document.querySelectorAll("#frmTabs button").forEach(b=>b.onclick=()=>setFMode(b.dataset.fm));
-document.querySelectorAll("#mainTabs button").forEach(b=>b.onclick=()=>{mode=b.dataset.m;render();});
+/* ダイアログ */
+["btnNew","fabNew"].forEach(id=>{ const b=$("#"+id); if(b) b.onclick=()=>openForm({logType:mode==="supply"?"supply":"device"}); });
+$("#btnDlgX").onclick=()=>$("#dlg").close();
+$("#btnCancel").onclick=()=>$("#dlg").close();
+document.querySelectorAll(".dlg-tab").forEach(b=>b.onclick=()=>setFMode(b.dataset.fm));
+document.querySelectorAll(".tab-btn").forEach(b=>b.onclick=()=>{ mode=b.dataset.m; render(); });
 
-/* ===== OCR エンジン ===== */
-let ocrWorker = null;
-const ocrBlobs = {order:null, deliv:null};  // ファイル名生成用のみ、画像本体は保持しない
+/* ===== OCR ===== */
+let ocrWorker=null;
+const ocrFiles={order:null,deliv:null};
 
-async function getOcrWorker(){
+async function getWorker(){
   if(ocrWorker) return ocrWorker;
-  ocrWorker = await Tesseract.createWorker(["jpn","eng"],1,{
-    logger: m=>{
-      if(m.status==="recognizing text"){
-        const pct = Math.round((m.progress||0)*100);
-        const el = document.getElementById(m._zone==="deliv"?"ocrDelivStatus":"ocrOrderStatus");
-        if(el) el.textContent=`読み取り中… ${pct}%`;
-      }
-    }
-  });
+  ocrWorker = await Tesseract.createWorker(["jpn","eng"],1,{});
   return ocrWorker;
 }
 
 async function fileToCanvas(file){
   if(file.type==="application/pdf"){
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data:ab}).promise;
-    const page = await pdf.getPage(1);
-    const vp = page.getViewport({scale:2});
-    const canvas = document.createElement("canvas");
-    canvas.width=vp.width; canvas.height=vp.height;
-    await page.render({canvasContext:canvas.getContext("2d"),viewport:vp}).promise;
-    return canvas;
+    const ab=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+    const page=await pdf.getPage(1);
+    const vp=page.getViewport({scale:2});
+    const c=document.createElement("canvas"); c.width=vp.width; c.height=vp.height;
+    await page.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;
+    return c;
   } else {
     return new Promise((res,rej)=>{
-      const img=new Image(); const url=URL.createObjectURL(file);
+      const img=new Image(), url=URL.createObjectURL(file);
       img.onload=()=>{ const c=document.createElement("canvas"); c.width=img.width; c.height=img.height; c.getContext("2d").drawImage(img,0,0); URL.revokeObjectURL(url); res(c); };
       img.onerror=rej; img.src=url;
     });
@@ -687,278 +661,154 @@ async function fileToCanvas(file){
 
 function parseText(text){
   const r={};
-  // 仕入先
-  const sv = supplierFromText(text);
-  if(sv) r.supplier=sv;
-  // 金額
+  const sv=supplierFromText(text); if(sv) r.supplier=sv;
   const ams=[...text.matchAll(/[¥￥]?\s?(\d{1,3}(?:,\d{3})+|\d{3,})\s?円?/g)];
-  if(ams.length){
-    const ns=ams.map(m=>parseInt(m[1].replace(/,/g,""),10)).filter(n=>n>100&&n<10000000);
-    if(ns.length) r.amount=Math.max(...ns);
-  }
-  // 数量
-  const qm=text.match(/(\d+)\s*(?:個|枚|本|冊|箱|セット)/);
-  if(qm) r.quantity=parseInt(qm[1],10);
-  // 日付
-  const dm=text.match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/);
-  if(dm) r.date=`${dm[1]}-${dm[2].padStart(2,"0")}-${dm[3].padStart(2,"0")}`;
-  // 注文番号
-  const om=text.match(/(?:注文番号|注文No\.?|Order\s*No\.?|Order#|発注番号)[\s:：]?\s?([A-Z0-9\-]{5,20})/i);
-  if(om) r.orderNo=om[1];
-  // 品名候補
+  if(ams.length){ const ns=ams.map(m=>parseInt(m[1].replace(/,/g,""),10)).filter(n=>n>100&&n<10000000); if(ns.length) r.amount=Math.max(...ns); }
+  const qm=text.match(/(\d+)\s*(?:個|枚|本|冊|箱|セット)/); if(qm) r.quantity=parseInt(qm[1],10);
+  const dm=text.match(/(\d{4})[\/\-年](\d{1,2})[\/\-月](\d{1,2})/); if(dm) r.date=`${dm[1]}-${dm[2].padStart(2,"0")}-${dm[3].padStart(2,"0")}`;
+  const om=text.match(/(?:注文番号|注文No\.?|Order\s*No\.?|Order#|発注番号)[\s:：]?\s?([A-Z0-9\-]{5,20})/i); if(om) r.orderNo=om[1];
   const lines=text.split(/\n/).map(l=>l.trim()).filter(l=>l.length>4&&l.length<60&&!/^\d+$/.test(l)&&!/合計|送料|税|消費税|注文|領収|請求|TOTAL/i.test(l));
   if(lines.length) r.sName=lines.sort((a,b)=>b.length-a.length)[0];
   return r;
 }
 
 function makeFileName(parsed, origName){
-  const code = supplierToCode(parsed.supplier||"");
-  const date  = (parsed.date||today()).replace(/-/g,"");
-  const amt   = parsed.amount ? String(parsed.amount) : "0";
-  const ext   = (origName||"").match(/\.pdf$/i) ? ".pdf" : ".jpg";
+  const code=supplierToCode(parsed.supplier||"");
+  const date=(parsed.date||today()).replace(/-/g,"");
+  const amt=parsed.amount?String(parsed.amount):"0";
+  const ext=(origName||"").match(/\.pdf$/i)?".pdf":".jpg";
   return `${code}-${date}-${amt}${ext}`;
 }
 
-function resetOcrZone(zone){
-  const Z=zone==="order";
-  const pre=Z?"ocrOrderPreview":"ocrDelivPreview";
-  const res=Z?"ocrOrderResult":"ocrDelivResult";
-  const st=Z?"ocrOrderStatus":"ocrDelivStatus";
-  $("#"+pre).style.display="none";
-  $("#"+res).style.display="none";
-  const sel=document.getElementById(st); if(sel) sel.textContent="";
-  ocrBlobs[zone]=null;
+function resetOcr(zone){
+  const isO=zone==="order";
+  $("#"+(isO?"ocrOrderPreview":"ocrDelivPreview")).style.display="none";
+  $("#"+(isO?"ocrOrderResult":"ocrDelivResult")).style.display="none";
+  const st=document.getElementById(isO?"ocrOrderStatus":"ocrDelivStatus"); if(st) st.textContent="";
+  ocrFiles[zone]=null;
 }
 
-async function runOcr(file, zone){
-  const isOrder = zone==="order";
-  const statusId = isOrder?"ocrOrderStatus":"ocrDelivStatus";
-  const previewId = isOrder?"ocrOrderPreview":"ocrDelivPreview";
-  const imgId     = isOrder?"ocrOrderImg":"ocrDelivImg";
-  const resultId  = isOrder?"ocrOrderResult":"ocrDelivResult";
-  const resultTxtId=isOrder?"ocrOrderResultText":"ocrDelivResultText";
-  const dlBtnId   = isOrder?"btnDlOrder":"btnDlDeliv";
-
-  document.getElementById(statusId).textContent="準備中…";
-  $("#"+resultId).style.display="none";
-
+async function runOcr(file,zone){
+  const isO=zone==="order";
+  const stId=isO?"ocrOrderStatus":"ocrDelivStatus";
+  const prevId=isO?"ocrOrderPreview":"ocrDelivPreview";
+  const imgId=isO?"ocrOrderImg":"ocrDelivImg";
+  const resId=isO?"ocrOrderResult":"ocrDelivResult";
+  const resTxtId=isO?"ocrOrderResultText":"ocrDelivResultText";
+  const dlId=isO?"btnDlOrder":"btnDlDeliv";
+  document.getElementById(stId).textContent="処理中…";
+  $("#"+resId).style.display="none";
   try{
-    // canvasに描画してプレビュー表示（元ファイルの中身をBase64などで保存しない）
-    const canvas = await fileToCanvas(file);
-    const previewUrl = canvas.toDataURL("image/jpeg", 0.7);
-    document.getElementById(imgId).src = previewUrl;
-    $("#"+previewId).style.display="";
-
-    // OCR実行
-    document.getElementById(statusId).textContent="読み取り中…";
-    const worker = await getOcrWorker();
-    const {data} = await worker.recognize(canvas);
-    const text = data.text||"";
-
-    addCommLog("OCR完了", "Tesseract.js（ローカル処理）",
-      `${zone==="order"?"注文書":"納品書"} — ${text.length}文字読み取り / 外部送信なし`);
-    document.getElementById(statusId).textContent="✓ 完了";
-
-    const parsed = parseText(text);
-
-    if(isOrder){
-      // フォームに自動入力
+    const canvas=await fileToCanvas(file);
+    document.getElementById(imgId).src=canvas.toDataURL("image/jpeg",.7);
+    $("#"+prevId).style.display="";
+    const worker=await getWorker();
+    const {data}=await worker.recognize(canvas);
+    document.getElementById(stId).textContent="完了";
+    addLog("OCR", "Tesseract.js（ローカル）", `${isO?"注文書":"納品書"} ${data.text.length}文字 / 外部送信なし`);
+    const parsed=parseText(data.text||"");
+    if(isO){
       if(parsed.supplier) document.querySelectorAll('input[name=supplier]').forEach(r=>r.checked=r.value===parsed.supplier);
       if(parsed.amount)   $("#iAmt").value=parsed.amount;
       if(parsed.quantity) $("#iQty").value=parsed.quantity;
       if(parsed.date)     $("#iSDate").value=parsed.date;
       if(parsed.orderNo)  $("#iOrderNo").value=parsed.orderNo;
       if(parsed.sName&&!$("#iSName").value) $("#iSName").value=parsed.sName;
-
-      // 結果表示
-      const lines=[
-        parsed.supplier?`購入先: ${parsed.supplier}`:null,
-        parsed.date    ?`日付: ${parsed.date}`:null,
-        parsed.amount  ?`金額: ¥${Number(parsed.amount).toLocaleString()}`:null,
-        parsed.quantity?`数量: ${parsed.quantity}個`:null,
-        parsed.orderNo ?`注文番号: ${parsed.orderNo}`:null,
-      ].filter(Boolean);
-      document.getElementById(resultTxtId).textContent = lines.join(" | ") || "情報を読み取れませんでした";
-      $("#"+resultId).style.display="";
-
-      // ファイル名生成 → ダウンロードボタン（元ファイルはこのblobのみ保持）
-      ocrBlobs.order = file;
-      const fname = makeFileName(parsed, file.name);
-      const dlBtn = $("#"+dlBtnId);
-      dlBtn.textContent = `📥 ${fname} でダウンロード（BOX保存用）`;
-      dlBtn.style.display="";
-      dlBtn.onclick=()=>{
-        const url=URL.createObjectURL(ocrBlobs.order);
-        const a=document.createElement("a"); a.href=url; a.download=fname; a.click();
-        URL.revokeObjectURL(url);
-        addCommLog("電帳法DL", "ローカル", `${fname} をダウンロード`);
-      };
-
+      const lines=[parsed.supplier&&`購入先: ${parsed.supplier}`,parsed.date&&`日付: ${parsed.date}`,parsed.amount&&`金額: ¥${Number(parsed.amount).toLocaleString()}`,parsed.quantity&&`数量: ${parsed.quantity}個`,parsed.orderNo&&`注文番号: ${parsed.orderNo}`].filter(Boolean);
+      document.getElementById(resTxtId).textContent=lines.join("  /  ")||"情報を読み取れませんでした";
+      ocrFiles.order=file;
+      const fname=makeFileName(parsed,file.name);
+      const dl=$("#"+dlId); dl.textContent=`${fname} をダウンロード`; dl.style.display=""; dl.onclick=()=>{ const url=URL.createObjectURL(ocrFiles.order); const a=document.createElement("a"); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url); };
     } else {
-      // 納品書 → 照合
-      const dqty = parsed.quantity || null;
-      const damt = parsed.amount   || null;
-      if(dqty) $("#iDelivQty").value = dqty;
-      if(damt) $("#iDelivAmt").value = damt;
-      if(parsed.date) $("#iDelivDate").value = parsed.date;
-
-      // 注文値と照合
-      const oqty = $("#iQty").value ? Number($("#iQty").value) : null;
-      const oamt = $("#iAmt").value ? Number($("#iAmt").value) : null;
-      const qtyOk = oqty==null || dqty==null || oqty===dqty;
-      const amtOk = oamt==null || damt==null || oamt===damt;
-
-      let verifyHtml="";
-      if(qtyOk&&amtOk){
-        verifyHtml=`<div class="verify-banner verify-ok">✓ 注文と一致しています！数量・金額OK</div>`;
-        // 状態を「受取済」に自動切替
-        document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value==="受取済");
-      } else {
-        const msgs=[];
-        if(!qtyOk) msgs.push(`数量: 注文${oqty}個 → 納品${dqty}個`);
-        if(!amtOk) msgs.push(`金額: 注文¥${Number(oamt).toLocaleString()} → 納品¥${Number(damt).toLocaleString()}`);
-        verifyHtml=`<div class="verify-banner verify-ng">⚠️ 差異あり — ${msgs.join(" / ")}</div>`;
-        document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value==="差異あり");
-      }
-      const lines=[
-        damt  ?`金額: ¥${Number(damt).toLocaleString()}`:null,
-        dqty  ?`数量: ${dqty}個`:null,
-        parsed.date?`日付: ${parsed.date}`:null,
-      ].filter(Boolean);
-      document.getElementById(resultTxtId).innerHTML = verifyHtml + lines.join(" | ");
-      $("#"+resultId).style.display="";
-      $("#verifyResult").style.display="none"; // OCR後はresultに統合
-
-      // 納品書DLボタン
-      ocrBlobs.deliv = file;
-      const fnameParsed = {supplier:document.querySelector('input[name=supplier]:checked')?.value, date:parsed.date, amount:damt};
-      const fname = makeFileName(fnameParsed, file.name).replace(/\./, "-納品書.");
-      const dlBtn = $("#"+dlBtnId);
-      dlBtn.textContent = `📥 ${fname} でダウンロード（BOX保存用）`;
-      dlBtn.style.display="";
-      dlBtn.onclick=()=>{
-        const url=URL.createObjectURL(ocrBlobs.deliv);
-        const a=document.createElement("a"); a.href=url; a.download=fname; a.click();
-        URL.revokeObjectURL(url);
-        addCommLog("電帳法DL", "ローカル", `${fname} をダウンロード`);
-      };
+      const dqty=parsed.quantity||null, damt=parsed.amount||null;
+      if(dqty) $("#iDelivQty").value=dqty;
+      if(damt) $("#iDelivAmt").value=damt;
+      if(parsed.date) $("#iDelivDate").value=parsed.date;
+      const oqty=$("#iQty").value?Number($("#iQty").value):null, oamt=$("#iAmt").value?Number($("#iAmt").value):null;
+      const qOk=oqty==null||dqty==null||oqty===dqty, aOk=oamt==null||damt==null||oamt===damt;
+      let banner="";
+      if(qOk&&aOk){ banner=`<div class="verify-banner verify-ok">注文と一致しています</div>`; document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value==="受取済"); }
+      else { const ms=[!qOk&&`数量: 注文${oqty} → 納品${dqty}`,!aOk&&`金額: ¥${Number(oamt).toLocaleString()} → ¥${Number(damt).toLocaleString()}`].filter(Boolean); banner=`<div class="verify-banner verify-ng">差異 — ${ms.join(" / ")}</div>`; document.querySelectorAll('input[name=supplyStatus]').forEach(r=>r.checked=r.value==="差異あり"); }
+      const lines=[damt&&`金額: ¥${Number(damt).toLocaleString()}`,dqty&&`数量: ${dqty}個`,parsed.date&&`日付: ${parsed.date}`].filter(Boolean);
+      document.getElementById(resTxtId).innerHTML=banner+(lines.length?`<div style="margin-top:4px">${lines.join("  /  ")}</div>`:"");
+      $("#verifyResult").innerHTML="";
+      ocrFiles.deliv=file;
+      const fname=makeFileName({supplier:document.querySelector('input[name=supplier]:checked')?.value,date:parsed.date,amount:damt},file.name).replace(/\./,"-納品書.");
+      const dl=$("#"+dlId); dl.textContent=`${fname} をダウンロード`; dl.style.display=""; dl.onclick=()=>{ const url=URL.createObjectURL(ocrFiles.deliv); const a=document.createElement("a"); a.href=url; a.download=fname; a.click(); URL.revokeObjectURL(url); };
     }
-
-    // canvasのデータをクリア（プレビュー表示用のdata:URLはimgに入っているが、元ファイルはblobのみ）
+    $("#"+resId).style.display="";
     canvas.width=0; canvas.height=0;
-
-  }catch(err){
-    document.getElementById(statusId).textContent="エラー";
-    addCommLog("OCR失敗", "Tesseract.js", err.message, false);
-    alert("読み取りに失敗しました: "+err.message);
-  }
+  }catch(err){ document.getElementById(stId).textContent="エラー"; alert("読み取りに失敗しました: "+err.message); }
 }
 
-// OCRファイル選択イベント（委譲）
-document.addEventListener("change", e=>{
+document.addEventListener("change",e=>{
   const t=e.target;
-  if(t.id==="ocrOrderCamera"||t.id==="ocrOrderFile"){
-    const f=t.files?.[0]; if(f) runOcr(f,"order"); t.value="";
-  }
-  if(t.id==="ocrDelivCamera"||t.id==="ocrDelivFile"){
-    const f=t.files?.[0]; if(f) runOcr(f,"deliv"); t.value="";
-  }
+  if(t.id==="ocrOrderCamera"||t.id==="ocrOrderFile"){ const f=t.files?.[0]; if(f) runOcr(f,"order"); t.value=""; }
+  if(t.id==="ocrDelivCamera"||t.id==="ocrDelivFile"){ const f=t.files?.[0]; if(f) runOcr(f,"deliv"); t.value=""; }
 });
-// クリアボタン（委譲）
-document.addEventListener("click", e=>{
-  const btn=e.target.closest("[data-zone]"); if(!btn||!btn.classList.contains("ocr-clear")) return;
-  resetOcrZone(btn.dataset.zone);
-});
+document.addEventListener("click",e=>{ const b=e.target.closest(".ocr-clear-btn"); if(b) resetOcr(b.dataset.zone); });
 
-/* ===== Excel エクスポート ===== */
+/* ===== Excel ===== */
 $("#btnExcel").onclick=()=>{
   if(!logs.length){ alert("データがありません"); return; }
-  const deviceRows=logs.filter(l=>l.logType!=="supply");
-  const supplyRows=logs.filter(l=>l.logType==="supply");
   const wb=XLSX.utils.book_new();
-
+  const dRows=logs.filter(l=>l.logType!=="supply");
+  const sRows=logs.filter(l=>l.logType==="supply");
   const wsD=XLSX.utils.aoa_to_sheet([
     ["日付","種別","手続き","部署","担当者","電話番号","機種","状態","メモ"],
-    ...deviceRows.map(r=>[r.date||"",r.category||"",r.action||"",r.dept||"",r.name||"",r.number||"",r.model||"",r.status||"",r.memo||""])
+    ...dRows.map(r=>[r.date||"",r.category||"",r.action||"",r.dept||"",r.name||"",r.number||"",r.model||"",r.status||"",r.memo||""])
   ]);
   wsD["!cols"]=[10,10,10,10,12,14,16,8,20].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,wsD,"端末・ライセンス");
-
   const wsS=XLSX.utils.aoa_to_sheet([
     ["注文日","品名","購入先","部署","注文数量","注文金額","注文番号","納品日","納品数量","納品金額","状態","メモ"],
-    ...supplyRows.map(r=>[r.date||"",r.sName||"",r.supplier||"",r.dept||"",r.quantity??"",r.amount??"",r.orderNo||"",r.deliveryDate||"",r.delivQty??"",r.delivAmt??"",r.status||"",r.sMemo||""])
+    ...sRows.map(r=>[r.date||"",r.sName||"",r.supplier||"",r.dept||"",r.quantity??"",r.amount??"",r.orderNo||"",r.deliveryDate||"",r.delivQty??"",r.delivAmt??"",r.status||"",r.sMemo||""])
   ]);
   wsS["!cols"]=[10,20,12,10,8,10,14,10,8,10,8,20].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,wsS,"備品・消耗品");
-
-  const stamp=new Date().toISOString().slice(0,10).replace(/-/g,"");
-  XLSX.writeFile(wb,`手続き備品ログ_${stamp}.xlsx`);
-  addCommLog("Excel出力","ローカル",`端末${deviceRows.length}件・備品${supplyRows.length}件`);
+  XLSX.writeFile(wb,`手続き備品ログ_${new Date().toISOString().slice(0,10).replace(/-/g,"")}.xlsx`);
+  addLog("Excel出力","ローカル",`端末${dRows.length}件・備品${sRows.length}件`);
 };
 
 /* ===== 通信ログ ===== */
 const commLog=[];
-function addCommLog(type,dest,detail,ok=true){
-  const now=new Date();
-  const ts=now.toLocaleDateString("ja-JP",{month:"2-digit",day:"2-digit"})+" "+now.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  const ua=navigator.userAgent;
-  const dev=ua.includes("iPhone")||ua.includes("Android")||ua.includes("iPad")?"📱":"💻";
-  commLog.unshift({ts,type,dest,detail,ok,dev});
+function addLog(type,dest,detail,ok=true){
+  const d=new Date();
+  commLog.unshift({ts:`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`,type,dest,detail,ok});
   if(commLog.length>100) commLog.length=100;
 }
-
-function showCommLog(){
-  const html=commLog.length===0
-    ?'<p style="color:var(--muted);font-size:12px;padding:8px 0">まだ操作ログはありません</p>'
-    :commLog.map(c=>`
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px">
-        <span style="color:var(--muted);white-space:nowrap">${c.ts} ${c.dev}</span>
-        <span>
-          <span style="font-weight:700;color:${c.ok?"var(--accent)":"var(--c-cancel)"}">${c.ok?"✓":"✗"} ${esc(c.type)}</span>
-          <span style="color:var(--muted)"> → ${esc(c.dest)}</span><br>
-          <span style="color:var(--ink2)">${esc(c.detail)}</span>
-        </span>
-      </div>`).join("");
-  const box=document.createElement("div");
-  box.style.cssText="position:fixed;inset:0;background:rgb(0 0 0/.5);z-index:300;display:flex;align-items:center;justify-content:center";
-  box.innerHTML=`<div style="background:var(--surface);border-radius:14px;padding:0;width:min(96vw,560px);max-height:80dvh;display:flex;flex-direction:column;overflow:hidden">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)">
-      <h3 style="font-size:14px;font-weight:700">🔒 操作・通信ログ</h3>
-      <button style="border:0;background:transparent;font-size:18px;cursor:pointer;color:var(--muted)" id="logClose">✕</button>
-    </div>
-    <div style="padding:4px 20px 16px;overflow-y:auto">
-      <p style="font-size:11px;color:var(--muted);padding:8px 0 4px">このツールのすべての操作・通信を記録しています。<br>OCR処理はブラウザ内のみで完結し、画像データは外部に送信されません。</p>
-      ${html}
-    </div>
-  </div>`;
-  document.body.appendChild(box);
-  box.addEventListener("click",e=>{ if(e.target===box||e.target.id==="logClose") box.remove(); });
+function renderLog(){
+  const el=$("#logList");
+  if(!commLog.length){ el.innerHTML='<div style="font-size:12px;color:var(--text-muted)">まだ操作ログはありません</div>'; return; }
+  el.innerHTML=commLog.map(c=>`
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:3px 10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <span style="color:var(--text-muted);white-space:nowrap">${c.ts}</span>
+      <div>
+        <span style="font-weight:600;color:${c.ok?"var(--accent)":"var(--red-600)"}">${c.ok?"✓":"✗"} ${esc(c.type)}</span>
+        <span style="color:var(--text-muted)"> → ${esc(c.dest)}</span>
+        <div style="color:var(--text-muted);margin-top:1px">${esc(c.detail)}</div>
+      </div>
+    </div>`).join("");
 }
-$("#btnLog").onclick=()=>showCommLog();
+$("#btnLog").onclick=()=>{ renderLog(); $("#logOverlay").classList.add("open"); };
+$("#logClose").onclick=()=>$("#logOverlay").classList.remove("open");
+$("#logOverlay").addEventListener("click",e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove("open"); });
 
 /* ===== QR ===== */
 let qrDone=false;
 $("#btnQr").onclick=()=>{
-  if(!qrDone){
-    new QRCode($("#qrcode"),{text:location.href,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});
-    $("#qrUrl").textContent=location.href; qrDone=true;
-  }
+  if(!qrDone){ new QRCode($("#qrcode"),{text:location.href,width:160,height:160,correctLevel:QRCode.CorrectLevel.M}); $("#qrUrl").textContent=location.href; qrDone=true; }
   $("#qrOverlay").classList.add("open");
 };
 $("#qrClose").onclick=()=>$("#qrOverlay").classList.remove("open");
 $("#qrOverlay").addEventListener("click",e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove("open"); });
 
 /* ===== 初期化 ===== */
-if(typeof pdfjsLib!=="undefined"){
-  pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-}
-lsLoad();
-buildDeptSegs();
-render();
-addCommLog("起動", "GitHub Pages（ローカル）", "データ読み込み完了 — 外部への通信なし");
+if(typeof pdfjsLib!=="undefined") pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+lsLoad(); render();
+addLog("起動","ローカル","外部通信なし");
 try{ $("#dlg").close(); }catch(e){}
-// バックグラウンドでOCRエンジンを事前ロード
-setTimeout(()=>getOcrWorker().catch(()=>{}), 1500);
+setTimeout(()=>getWorker().catch(()=>{}),2000);
 </script>
 </body>
 </html>
