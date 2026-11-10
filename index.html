@@ -150,6 +150,8 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
 .bar-fill { height: 100%; width: 0; background: var(--accent); transition: width .25s; }
 [hidden] { display: none !important; }
 
+.file-info { font-size: 12px; color: var(--text-muted); line-height: 1.8; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); word-break: break-all; }
+.file-info b { color: var(--text); font-weight: 500; }
 .verify-banner { padding: 8px 10px; border-radius: 6px; font-size: 12.5px; }
 .verify-ok { background: var(--surface); color: var(--accent); border: 1px solid var(--accent-mid); }
 .verify-ng { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger); }
@@ -303,6 +305,22 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
   </div>
 </div>
 
+<!-- 記録を別の端末へ渡す -->
+<div class="modal-overlay" id="handOverlay">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-head"><h3>別の端末へ渡す</h3><button class="icon-btn" id="handClose" type="button" aria-label="閉じる">✕</button></div>
+    <div class="modal-body">
+      <p class="note" id="handTitle" style="margin-bottom:4px;color:var(--text)"></p>
+      <div class="qr-wrap" style="padding-top:8px">
+        <div id="handQr"></div>
+        <p class="note">受け取る端末（iPhoneなど）の<b>カメラアプリでこのQRを読む</b>と、この記録が取り込まれます。納品書が届いたら、その端末で「納品書を照合」してください。</p>
+        <button class="btn btn-ghost" id="handCopy" type="button">リンクをコピー</button>
+        <p class="note" style="font-size:11px">記録はQR（リンク）の中にだけ入っていて、サーバーには送られません。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- QR -->
 <div class="modal-overlay" id="qrOverlay">
   <div class="modal-box" style="max-width:360px">
@@ -412,6 +430,7 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
         <div class="field"><label for="iOrderNo">注文番号</label><input id="iOrderNo" autocomplete="off"></div>
       </div>
       <div class="field"><label for="iSMemo">メモ</label><textarea id="iSMemo" rows="2" placeholder="管理番号・用途など"></textarea></div>
+      <div class="file-info" id="fileInfo" hidden></div>
 
       <div class="ocr-zone is-verify" id="verifySection" hidden>
         <div class="ocr-zone-head"><span class="t">納品書と照合</span><span class="s" id="ocrDelivStatus"></span></div>
@@ -446,6 +465,7 @@ form { overflow-y: auto; padding: 16px 20px 20px; display: grid; gap: 14px; }
 
     <div class="form-actions">
       <button class="btn btn-danger left" type="button" id="btnDel" hidden>削除</button>
+      <button class="btn btn-ghost" type="button" id="btnHand" hidden>別の端末へ渡す</button>
       <button class="btn btn-ghost" type="button" id="btnCancel">キャンセル</button>
       <button class="btn btn-primary" type="submit" id="btnSave">保存</button>
     </div>
@@ -570,6 +590,7 @@ function openForm(pre={}, opts={}){
   setFMode(m); buildChips();
   $("#dlgTitle").textContent = opts.title || (editId?"記録を編集":"新規記録");
   $("#btnDel").hidden = !editId;
+  $("#btnHand").hidden = !editId;
   resetOcr("order"); resetOcr("deliv");
   if(m==="device"){
     setRadio("cat",pre.category||""); setRadio("act",pre.action||""); setRadio("dept",pre.dept||""); setRadio("status",pre.status||"完了");
@@ -581,9 +602,21 @@ function openForm(pre={}, opts={}){
     $("#iSDate").value=pre.date||today(); $("#iOrderNo").value=pre.orderNo||""; $("#iSMemo").value=pre.sMemo||"";
     $("#iDelivQty").value=pre.delivQty??""; $("#iDelivAmt").value=pre.delivAmt??""; $("#iDelivDate").value=pre.deliveryDate||"";
     $("#verifySection").hidden = !(editId || opts.verify);
+    docFiles = { order: pre.orderFile||null, deliv: pre.delivFile||null };
+    renderFileInfo();
     renderVerify();
   }
   if(!$("#dlg").open) $("#dlg").showModal();
+}
+
+/* この記録に結びつく書類（BOXに保存したファイル名） */
+let docFiles = { order:null, deliv:null };
+function renderFileInfo(){
+  const el=$("#fileInfo"), rows=[];
+  if(docFiles.order) rows.push(`注文書：<b>${esc(docFiles.order)}</b>`);
+  if(docFiles.deliv) rows.push(`納品書：<b>${esc(docFiles.deliv)}</b>`);
+  el.innerHTML = rows.length ? "BOXのファイル<br>"+rows.join("<br>") : "";
+  el.hidden = !rows.length;
 }
 
 /* 注文と納品の数値を比べて表示・状態を更新 */
@@ -610,6 +643,7 @@ $("#frm").addEventListener("submit", e=>{
       supplier:radioVal("supplier"), dept:radioVal("deptS"), sName:$("#iSName").value.trim(),
       quantity:num($("#iQty").value), amount:num($("#iAmt").value), date:$("#iSDate").value||today(),
       orderNo:$("#iOrderNo").value.trim()||null, sMemo:$("#iSMemo").value.trim(),
+      orderFile:docFiles.order, delivFile:docFiles.deliv,
       delivQty:num($("#iDelivQty").value), delivAmt:num($("#iDelivAmt").value), deliveryDate:$("#iDelivDate").value||null,
       status:radioVal("supplyStatus")||"発注済", ...base });
   } else {
@@ -730,6 +764,7 @@ async function fileToCanvas(file){
 
 const SC_MAP={纳:"納",东:"東",额:"額",单:"単",价:"価",样:"様",计:"計",发:"発",书:"書",订:"訂",费:"費",务:"務",总:"総",请:"請",领:"領",货:"貨",运:"運",贩:"販",销:"販",类:"類",项:"項",应:"応",账:"帳",强:"強",纸:"紙"};
 function normalizeText(raw){
+  raw = raw.normalize("NFKC");
   // OCRが日本語1文字ごとに空白を入れているときだけ詰める（iPhoneの文字認識の正しい空白は残す）
   const jp=(raw.match(/[^\x00-\x7F]/g)||[]).length, gaps=(raw.match(/[^\x00-\x7F] (?=[^\x00-\x7F])/g)||[]).length;
   if(jp && gaps/jp>0.2) raw=raw.replace(/(?<=[^\x00-\x7F]) (?=[^\x00-\x7F])/g,"");
@@ -816,7 +851,7 @@ function parseText(raw){
   if(named.length) r.sName = named[0].name + (r.items.length>1 ? ` 他${r.items.length-1}点` : "");
   else if(codeNames.length) r.sName = codeNames[0] + (codeNames.length>1 ? ` 他${codeNames.length-1}点` : "");
   else {
-    const cand=lines.filter(l=>l.length>4&&l.length<60&&/[ぁ-んァ-ヶ一-龠]{2}/.test(l)&&!/合計|小計|送料|税|注文|領収|請求|納品|株式会社|住所|電話|TEL|〒|様|上段|下段|番号|担当|お問い合わせ|ありがとう|サービス|都|区/i.test(l));
+    const cand=lines.filter(l=>l.length>4&&l.length<60&&/[ぁ-んァ-ヶ一-龠]{2}/.test(l)&&!/合計|小計|送料|税|注文|領収|請求|納品|株式会社|住所|電話|TEL|〒|様|上段|下段|番号|担当|商品名|数量|単価|お問い合わせ|ありがとう|サービス|都|区/i.test(l));
     const clean=cand.filter(l=>(l.match(/[ぁ-んァ-ヶ一-龠]/g)||[]).length/l.replace(/\s/g,"").length>0.5);   // 記号だらけの誤認識は使わない
     if(clean.length) r.sName=clean.sort((a,b)=>b.length-a.length)[0];
   }
@@ -834,7 +869,7 @@ function makeFileName(p, origName, suffix=""){
 /* 文字の位置情報から「単価 → 金額」の組を作り、数量は 金額÷単価 で求める（紙が傾いて行が崩れても拾える） */
 function parseBoxes(words){
   const W=words.filter(w=>w&&w.box).map(w=>{ const t=normalizeText(w.text).trim(), b=w.box; return {t, x:b.x, r:b.x+b.width, h:b.height, cy:b.y+b.height/2}; });
-  const nums=W.filter(w=>/^¥?\d{1,3}(,\d{3})+$|^¥?\d{1,7}$/.test(w.t)).map(w=>({...w, v:toInt(w.t.replace("¥",""))}));
+  const nums=W.filter(w=>/^¥?\d{1,3}(,\d{3})+円?$|^¥?\d{1,7}円?$/.test(w.t)).map(w=>({...w, v:toInt(w.t.replace(/[¥円]/g,""))}));
   const usedP=new Set(), usedA=new Set(), items=[];
   [...nums].sort((a,b)=>b.x-a.x).forEach(A=>{
     if(usedP.has(A)||A.v<1) return;
@@ -846,8 +881,14 @@ function parseBoxes(words){
   });
   items.sort((a,b)=>a.cy-b.cy);
   // 品名：商品コード（例 139-655）で始まる文字列
-  const names=W.filter(w=>/^[A-Z0-9]{1,4}-\d{2,5}/.test(w.t)&&/[ぁ-んァ-ヶ一-龠]{2}/.test(w.t)).sort((a,b)=>a.cy-b.cy)
-    .map(w=>({cy:w.cy, n:w.t.replace(/^[A-Z0-9]{1,4}-\d{2,5}\s*/,"").replace(/\s{2,}/g," ").trim()}));
+  const names=W.filter(w=>/^[A-Z0-9]{1,4}-\d{2,5}/.test(w.t)).map(w=>{
+      let n=w.t.replace(/^[A-Z0-9]{1,4}-\d{2,5}\s*/,"").trim();
+      if(!/[ぁ-んァ-ヶ一-龠]{2}/.test(n)){   // コードだけのマス → 同じ行の右隣のマスが品名
+        const nx=W.filter(o=>o!==w&&o.x>w.r-2&&Math.abs(o.cy-w.cy)<w.h*0.6&&/[ぁ-んァ-ヶ一-龠]{2}/.test(o.t)).sort((a,b)=>a.x-b.x)[0];
+        n = nx ? nx.t : "";
+      }
+      return {cy:w.cy, n:n.replace(/\s{2,}/g," ").trim()};
+    }).filter(x=>x.n).sort((a,b)=>a.cy-b.cy);
   if(names.length===items.length) items.forEach((it,i)=>it.name=names[i].n);
   else items.forEach(it=>{ const c=names.filter(n=>!n.used&&n.cy<=it.cy+it.h).pop(); if(c){ c.used=true; it.name=c.n; } });
   // 合計：「合計」などの右（または少し下）にある数字
@@ -878,9 +919,56 @@ function parseOcr(text, words){
   return r;
 }
 
+/* 文字データ入りのPDF（ネット注文の注文書など）から、文字と位置をそのまま取り出す */
+async function pdfText(file){
+  const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+  const words=[]; let offset=0;
+  for(let p=1; p<=Math.min(pdf.numPages,3); p++){
+    const page=await pdf.getPage(p), vp=page.getViewport({scale:2});
+    const tc=await page.getTextContent();
+    for(const it of tc.items){
+      if(!it.str || !it.str.trim()) continue;
+      const t=pdfjsLib.Util.transform(vp.transform, it.transform);
+      const hgt=Math.hypot(t[2],t[3]) || 10;
+      words.push({ text:it.str.trim(), box:{ x:t[4], y:offset+t[5]-hgt, width:(it.width||0)*vp.scale, height:hgt } });
+    }
+    offset+=vp.height;
+  }
+  words.sort((a,b)=>(a.box.y-b.box.y)||(a.box.x-b.box.x));
+  const merged=[];
+  for(const w of [...words].sort((a,b)=>{ const dy=(a.box.y+a.box.height/2)-(b.box.y+b.box.height/2); return Math.abs(dy)<Math.min(a.box.height,b.box.height)*0.5 ? a.box.x-b.box.x : dy; })){
+    const m=merged[merged.length-1];
+    if(m && Math.abs((m.box.y+m.box.height/2)-(w.box.y+w.box.height/2))<w.box.height*0.5 && w.box.x-(m.box.x+m.box.width) < w.box.height*0.35){
+      m.text+=w.text; m.box.width=w.box.x+w.box.width-m.box.x;
+    } else merged.push({text:w.text, box:{...w.box}});
+  }
+  words.length=0; words.push(...merged);
+  // 同じ高さの文字を1行にまとめて文章にする
+  const sorted=[...words].sort((a,b)=>(a.box.y+a.box.height/2)-(b.box.y+b.box.height/2));
+  const rows=[];
+  for(const w of sorted){
+    const cy=w.box.y+w.box.height/2, row=rows[rows.length-1];
+    if(row && Math.abs(row.cy-cy) < w.box.height*0.5) row.ws.push(w); else rows.push({cy, ws:[w]});
+  }
+  const text=rows.map(r=>r.ws.sort((a,b)=>a.box.x-b.box.x).map(w=>w.text).join(" ")).join("\n");
+  return { text, words, chars:text.replace(/\s/g,"").length };
+}
+
 async function ocrFile(file, cb){
   progressCb = cb;
   try{
+    if(file.type==="application/pdf"){
+      try{
+        const t=await pdfText(file);
+        if(t.chars>=30){
+          const canvas=await fileToCanvas(file), preview=canvas.toDataURL("image/jpeg",.7);
+          canvas.width=0; canvas.height=0;
+          if(cb) cb({phase:"done"});
+          addLog("PDFの文字を読み取り","端末内",`${t.chars}文字・文字認識なしで正確に読み取り`);
+          return { file, preview, parsed: parseOcr(t.text, t.words) };
+        }
+      }catch(e){ /* 文字データのないPDF（スキャンしたもの）は下の文字認識へ */ }
+    }
     const canvas = await fileToCanvas(file);
     const preview = canvas.toDataURL("image/jpeg",.7);
     const svc = await getOcr();
@@ -949,7 +1037,10 @@ function applyOrder(res){
   $("#ocrOrderResultText").textContent = weak(p) ? WEAK_MSG : `自動入力しました：${summary(p)}。内容を確認して保存してください。`;
   ocrFiles.order=res.file||null;
   const suffix = p.docType ? `-${p.docType}` : "";
-  setDl("#btnDlOrder", makeFileName({supplier:radioVal("supplier")||p.supplier, date:(p.docType==="納品書"&&p.deliveryDate)||$("#iSDate").value, amount:num($("#iAmt").value)}, res.file?.name, suffix), "order");
+  const oName = makeFileName({supplier:radioVal("supplier")||p.supplier, date:(p.docType==="納品書"&&p.deliveryDate)||$("#iSDate").value, amount:num($("#iAmt").value)}, res.file?.name, suffix);
+  setDl("#btnDlOrder", oName, "order");
+  if(p.docType==="納品書") docFiles.deliv=oName; else docFiles.order=oName;
+  renderFileInfo();
   $("#ocrOrderResult").hidden=false; $("#ocrOrderStatus").textContent="読み取り完了";
   // 発注を記録していなかった納品書は、そのまま「受取済」として記録できるようにする
   if(p.docType==="納品書"){
@@ -971,7 +1062,9 @@ function applyDeliv(res){
   showPreview("deliv", res);
   $("#ocrDelivResultText").textContent = weak(p) ? WEAK_MSG : `納品書から読み取り：${summary(p)}`;
   ocrFiles.deliv=res.file||null;
-  setDl("#btnDlDeliv", makeFileName({supplier:radioVal("supplier")||p.supplier, date:p.deliveryDate||p.date||today(), amount:num($("#iDelivAmt").value)}, res.file?.name, "-納品書"), "deliv");
+  const dName = makeFileName({supplier:radioVal("supplier")||p.supplier, date:p.deliveryDate||p.date||today(), amount:num($("#iDelivAmt").value)}, res.file?.name, "-納品書");
+  setDl("#btnDlDeliv", dName, "deliv");
+  docFiles.deliv=dName; renderFileInfo();
   $("#ocrDelivResult").hidden=false; $("#ocrDelivStatus").textContent="読み取り完了";
 }
 
@@ -1158,6 +1251,54 @@ $("#pickNew").onclick=()=>{
 };
 $("#pickClose").onclick=()=>{ pendingDeliv=null; $("#pickOverlay").classList.remove("open"); };
 
+/* ===== 記録を別の端末へ渡す（QR・リンクの # 以降に記録を入れる。# 以降はサーバーに送られない） ===== */
+const b64url = u8 => { let s=""; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); };
+const unb64url = s => { const b=atob(s.replace(/-/g,"+").replace(/_/g,"/")); const u=new Uint8Array(b.length); for(let i=0;i<b.length;i++) u[i]=b.charCodeAt(i); return u; };
+async function packRecord(rec){
+  const bytes=new TextEncoder().encode(JSON.stringify(rec));
+  if(window.CompressionStream){
+    const z=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer());
+    return "1"+b64url(z);
+  }
+  return "0"+b64url(bytes);
+}
+async function unpackRecord(s){
+  let bytes=unb64url(s.slice(1));
+  if(s[0]==="1") bytes=new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer());
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+let handUrl="";
+$("#btnHand").onclick=async()=>{
+  const rec=logs.find(l=>l.id===editId); if(!rec) return;
+  const base=location.origin+location.pathname+"#import=";
+  let url=base+await packRecord(rec);
+  if(url.length>900) url=base+await packRecord({...rec, sMemo:(rec.sMemo||"").slice(0,120)});   // QRに入りきらないときはメモを短く
+  handUrl=url;
+  $("#dlg").close();
+  $("#handTitle").textContent = rec.logType==="supply" ? `${rec.supplier||""} ${rec.sName||""} ${rec.amount!=null?yen(rec.amount):""}` : `${rec.action||""} ${rec.name||""}`;
+  $("#handQr").innerHTML="";
+  try{ new QRCode($("#handQr"),{text:url,width:280,height:280,correctLevel:QRCode.CorrectLevel.L}); }
+  catch(e){ $("#handQr").innerHTML='<p class="note">記録が長すぎてQRにできません。「リンクをコピー」を使ってください。</p>'; }
+  $("#handOverlay").classList.add("open");
+  addLog("記録を渡す","QR・リンク（サーバー経由なし）",`ID:${rec.id}`);
+};
+$("#handCopy").onclick=async()=>{
+  try{ await navigator.clipboard.writeText(handUrl); toast("リンクをコピーしました"); }
+  catch(e){ prompt("このリンクを受け取る端末で開いてください", handUrl); }
+};
+async function checkImport(){
+  const m=location.hash.match(/^#import=([A-Za-z0-9_-]+)$/); if(!m) return;
+  history.replaceState(null,"",location.pathname+location.search);
+  let rec;
+  try{ rec=await unpackRecord(m[1]); if(!rec||!rec.id||!/^L[a-z0-9]+$/.test(rec.id)) throw 0; }
+  catch(e){ alert("記録を読み込めませんでした。QRを読み直してください。"); return; }
+  const ex=logs.find(l=>l.id===rec.id);
+  if(ex && (ex.updatedAt||0)>=(rec.updatedAt||0)){ toast("この記録はすでに取り込み済みです"); }
+  else { const {id,...data}=rec; saveLog(id, data); toast("記録を取り込みました"); addLog("記録の受け取り","QR・リンク（サーバー経由なし）",`ID:${id}`); }
+  mode = rec.logType==="supply" ? "supply" : "device"; render();
+}
+window.addEventListener("hashchange", checkImport);
+
 /* ===== Excel ===== */
 $("#btnExcel").onclick=()=>{
   if(!logs.length){ alert("データがありません"); return; }
@@ -1170,10 +1311,10 @@ $("#btnExcel").onclick=()=>{
   wsD["!cols"]=[10,10,10,8,12,14,16,8,24].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,wsD,"端末・ライセンス");
   const wsS=XLSX.utils.aoa_to_sheet([
-    ["注文日","品名","購入先","部署","注文数量","注文金額","注文番号","到着日","納品数量","納品金額","照合","状態","メモ"],
-    ...sRows.map(r=>[r.date||"",r.sName||"",r.supplier||"",r.dept||"",r.quantity??"",r.amount??"",r.orderNo||"",r.deliveryDate||"",r.delivQty??"",r.delivAmt??"",(r.delivQty==null&&r.delivAmt==null)?"":(hasDiff(r)?"差異あり":"一致"),r.status||"",r.sMemo||""])
+    ["注文日","品名","購入先","部署","注文数量","注文金額","注文番号","到着日","納品数量","納品金額","照合","状態","注文書ファイル","納品書ファイル","メモ"],
+    ...sRows.map(r=>[r.date||"",r.sName||"",r.supplier||"",r.dept||"",r.quantity??"",r.amount??"",r.orderNo||"",r.deliveryDate||"",r.delivQty??"",r.delivAmt??"",(r.delivQty==null&&r.delivAmt==null)?"":(hasDiff(r)?"差異あり":"一致"),r.status||"",r.orderFile||"",r.delivFile||"",r.sMemo||""])
   ]);
-  wsS["!cols"]=[10,24,12,8,8,10,16,10,8,10,8,8,24].map(w=>({wch:w}));
+  wsS["!cols"]=[10,24,12,8,8,10,16,10,8,10,8,8,28,28,24].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb,wsS,"備品・消耗品");
   XLSX.writeFile(wb,`手続き備品ログ_${today().replace(/-/g,"")}.xlsx`);
   addLog("Excel出力","端末のダウンロード",`端末${dRows.length}件・備品${sRows.length}件`);
@@ -1218,7 +1359,7 @@ $("#qrSave").onclick=()=>{
 };
 
 /* オーバーレイを閉じる */
-[["#logOverlay","#logClose"],["#qrOverlay","#qrClose"]].forEach(([ov,cl])=>{
+[["#logOverlay","#logClose"],["#qrOverlay","#qrClose"],["#handOverlay","#handClose"]].forEach(([ov,cl])=>{
   $(cl).onclick=()=>$(ov).classList.remove("open");
   $(ov).addEventListener("click",e=>{ if(e.target===e.currentTarget) e.currentTarget.classList.remove("open"); });
 });
@@ -1229,6 +1370,7 @@ lsLoad();
 const startScan = new URLSearchParams(location.search).get("scan");
 if(startScan==="order"||startScan==="deliv"){ mode="supply"; render(); openScan(startScan); }
 else { render(); }
+checkImport();
 /* 認識エンジンは撮影後に読み込む（先に読み込むとスマホのカメラが真っ暗になることがあるため） */
 addLog("起動","この端末","記録はこの端末内のみ・外部サーバーへの送信なし");
 </script>
