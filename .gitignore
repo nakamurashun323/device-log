@@ -1,0 +1,13 @@
+.cache/
+.claude/
+.config/
+.local/
+.npm-global/
+.npm/
+.ssh/
+.wget-hsts
+.gitconfig
+device-log-standalone.html
+device-log.html
+gas-backend.js
+setup-instructions.md
