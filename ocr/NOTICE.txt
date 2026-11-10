@@ -1,0 +1,9 @@
+このフォルダの文字認識部品（すべて閲覧者の端末のブラウザ内で動作し、画像を外部に送信しません）
+
+- PP-OCRv5 mobile 検出・認識モデル、文字辞書（PaddleOCR / Apache License 2.0）
+  npm: pdfmarkdown-ppocrv5-models@1.0.0  → LICENSE-PaddleOCR-models.txt
+- ppu-paddle-ocr 6.7.0（MIT License）→ LICENSE-ppu-paddle-ocr.txt
+  ppu-ocv 4.0.0（MIT License）
+- onnxruntime-web 1.23.2（MIT License, Copyright (c) Microsoft Corporation）
+
+paddle-ocr.js は ppu-paddle-ocr/web と onnxruntime-web/wasm を esbuild で1ファイルにまとめたものです。
