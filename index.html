@@ -791,7 +791,6 @@ function openScan(kind){
   const t=SCAN_TEXT[kind];
   $("#scanKicker").textContent=t.kicker; $("#scanTitle").textContent=t.title; $("#scanDesc").textContent=t.desc;
   $("#scanScreen").classList.add("open");
-  getWorker().catch(()=>{});   // 構えている間に読み取りエンジンを準備
 }
 function closeScan(){
   $("#scanScreen").classList.remove("open");
@@ -940,7 +939,8 @@ if(typeof pdfjsLib!=="undefined") pdfjsLib.GlobalWorkerOptions.workerSrc="https:
 lsLoad();
 const startScan = new URLSearchParams(location.search).get("scan");
 if(startScan==="order"||startScan==="deliv"){ mode="supply"; render(); openScan(startScan); }
-else { render(); setTimeout(()=>getWorker().catch(()=>{}), 2500); }
+else { render(); }
+/* 認識エンジンは撮影後に読み込む（先に読み込むとスマホのカメラが真っ暗になることがあるため） */
 addLog("起動","この端末","記録はこの端末内のみ・外部サーバーへの送信なし");
 </script>
 </body>
